@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class Sim
 {
-    /**
+    /**  
      * the constructor does nothing
      *
      */

@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class RAM
 {
-    //member veriables
+    //member variables
     /**
      * The size of the RAM (expressed as a number of integers)
      **/
