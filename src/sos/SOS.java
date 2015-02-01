@@ -13,6 +13,8 @@ import java.util.*;
  * @author Justice Nichols
  * @author Krismy Alfaro
  * @author Matthew Farr
+ *  
+ * @author Zach Pearson
  */
    
 public class SOS implements CPU.TrapHandler
