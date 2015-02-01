@@ -149,7 +149,15 @@ public class SOS implements CPU.TrapHandler
     }
     
 
-	@Override
+	
+
+
+    /*======================================================================
+     * Interrupt Handlers
+     *----------------------------------------------------------------------
+     */
+
+    @Override
 	public void interruptIllegalMemoryAccess(int addr) {
 		// TODO Auto-generated method stub
 		System.out.println("Illegal Memory Access Exception!");
@@ -170,21 +178,17 @@ public class SOS implements CPU.TrapHandler
         System.exit(0);
 		
 	}
-
-
-    /*======================================================================
-     * Interrupt Handlers
-     *----------------------------------------------------------------------
-     */
-
-    //None yet!
     
     /*======================================================================
      * System Calls
      *----------------------------------------------------------------------
      */
 	    
-	//<insert header comment here>
+	/**
+	 * call backs for handling trap from CPU
+	 * 
+	 */
+
 	@Override
 	public void systemCall()
 	{
@@ -210,7 +214,10 @@ public class SOS implements CPU.TrapHandler
 	}
 	private void exit()
 	{
-		System.out.println("Exit handled!");
+		if(m_verbose)
+		{
+			System.out.println("Exit handled!");
+		}
 	    System.exit(0);
 	}
 	private void output()
@@ -222,11 +229,15 @@ public class SOS implements CPU.TrapHandler
 	{
 		int a = 42;
 		m_CPU.pushToStack2(a);
-		System.out.println("PID = " + a);
+		if(m_verbose)
+		{
+			System.out.println("PID = " + a);
+		}
 
 	}
 	private void coreDump()
 	{
+		System.out.println("CORE DUMP: ");
 		m_CPU.regDump();
 		for (int i = 0; i < 3; i++)
 		{
