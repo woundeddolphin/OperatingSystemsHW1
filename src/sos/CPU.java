@@ -202,7 +202,7 @@ public class CPU {
      * 
      * Prints the values of the registers. Useful for debugging.
      */
-    private void regDump() {
+    public void regDump() {
         for (int i = 0; i < NUMGENREG; i++) {
             System.out.print("r" + i + "=" + m_registers[i] + " ");
         }// for
@@ -434,6 +434,13 @@ public class CPU {
         m_RAM.write(getLIM() - getSP(), m_registers[register]);
 
     }
+    public void pushToStack2(int content)
+    {
+    	setSP((getSP() + 1));
+        m_RAM.write(getLIM() - getSP(), content);
+
+    }
+ 
 
     /**
      * popFromStack()
@@ -447,6 +454,12 @@ public class CPU {
         setSP((getSP() - 1));
     }
 
+    public int popFromStack()
+    {
+    	int toReturn = m_RAM.read(getLIM() - getSP());
+        setSP((getSP() - 1));
+        return toReturn;
+    }
     /**
      * popFromStack()
      * 

@@ -171,17 +171,7 @@ public class SOS implements CPU.TrapHandler
 		
 	}
 
-	
-	 //<insert header comment here>
-	@Override
-    public void systemCall()
-    {
-		//TODO
-        //%%%REPLACE THESE LINES WITH APPROPRIATE CODE
-        System.out.println("TRAP handled!");
-        System.exit(0);
-    }
-        
+
     /*======================================================================
      * Interrupt Handlers
      *----------------------------------------------------------------------
@@ -193,7 +183,57 @@ public class SOS implements CPU.TrapHandler
      * System Calls
      *----------------------------------------------------------------------
      */
-    
-    //None yet!
+	    
+	//<insert header comment here>
+	@Override
+	public void systemCall()
+	{
+		//TODO
+		int opCode = m_CPU.popFromStack();
+		switch (opCode)
+		{
+		case SYSCALL_EXIT:
+			exit();
+			break;
+		case SYSCALL_OUTPUT:
+			output();
+			break;
+		case SYSCALL_GETPID:
+			pid();
+			break;
+		case SYSCALL_COREDUMP:
+			coreDump();
+			break;
+		default:
+			break;
+		}
+	}
+	private void exit()
+	{
+		System.out.println("Exit handled!");
+	    System.exit(0);
+	}
+	private void output()
+	{
+		int a = m_CPU.popFromStack();
+		System.out.println("OUTPUT: " + a);
+	}
+	private void pid ()
+	{
+		int a = 42;
+		m_CPU.pushToStack2(a);
+		System.out.println("PID = " + a);
+
+	}
+	private void coreDump()
+	{
+		m_CPU.regDump();
+		for (int i = 0; i < 3; i++)
+		{
+			System.out.println("Stack " + i + " " + m_CPU.popFromStack());;
+		}
+		exit();
+	}
+		
     
 };//class SOS
