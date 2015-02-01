@@ -1,0 +1,40 @@
+    //======================================================================
+    //Callback Interface
+    //----------------------------------------------------------------------
+    /**
+     * TrapHandler
+     *
+     * This interface should be implemented by the operating system to allow the
+     * simulated CPU to generate hardware interrupts and system calls.
+     */
+    public interface TrapHandler
+    {
+        void interruptIllegalMemoryAccess(int addr);
+        void interruptDivideByZero();
+        void interruptIllegalInstruction(int[] instr);
+        void systemCall();
+    };//interface TrapHandler
+
+
+    
+    /**
+     * a reference to the trap handler for this CPU.  On a real CPU this would
+     * simply be an address that the PC register is set to.
+     */
+    private TrapHandler m_TH = null;
+
+
+
+    
+
+    /**
+     * registerTrapHandler
+     *
+     * allows SOS to register itself as the trap handler 
+     */
+    public void registerTrapHandler(TrapHandler th)
+    {
+        m_TH = th;
+    }
+    
+    
