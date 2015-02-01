@@ -64,7 +64,7 @@ public class CPU {
     /**
      * specifies whether the CPU should output details of its work
      **/
-    private boolean m_verbose = true;
+    private boolean m_verbose = false;
 
     /**
      * This array contains all the registers on the "chip".
@@ -322,8 +322,15 @@ public class CPU {
 
             case DIV:
                 // divide arg2 and arg3
-                m_registers[instruction[1]] = m_registers[instruction[2]]
+            	if (m_registers[instruction[3]]==0)
+            	{
+            		m_TH.interruptDivideByZero();
+            	}
+            	else
+            	{
+            		m_registers[instruction[1]] = m_registers[instruction[2]]
                         / m_registers[instruction[3]];
+            	}
                 break;
 
             case COPY:
@@ -383,9 +390,9 @@ public class CPU {
                 break;
 
             default:
+                m_TH.interruptIllegalInstruction(instruction);
                 break;
             }
-
             // advance the PC register by the instruction size for next
             // instruction
             setPC(getPC() + INSTRSIZE);
@@ -406,15 +413,22 @@ public class CPU {
 
     private boolean checkAccess(int register) {
         if ((register + getBASE()) < getBASE()) {
-            System.out
+        	if (m_verbose)
+        	{
+        		System.out
                     .println("Attempting to access register that is less than" +
                             " base register");
- 
+        	}
+        	m_TH.interruptIllegalMemoryAccess(register);
             return false;
         } else if ((register + getBASE()) > getLIM()) {
-            System.out
+        	if(m_verbose)
+        	{
+        		System.out
                     .println("Attempting to access register that is greater" + 
                             " than the limit register");
+        	}
+        	m_TH.interruptIllegalMemoryAccess(register);
             return false;
         }
 
