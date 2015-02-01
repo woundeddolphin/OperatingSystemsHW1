@@ -15,12 +15,23 @@ import java.util.*;
  * @author Matthew Farr
  */
    
-public class SOS
+public class SOS implements CPU.TrapHandler
 {
+	//======================================================================
+    //Constants
+    //----------------------------------------------------------------------
+
+    //These constants define the system calls this OS can currently handle
+    public static final int SYSCALL_EXIT     = 0;    /* exit the current program */
+    public static final int SYSCALL_OUTPUT   = 1;    /* outputs a number */
+    public static final int SYSCALL_GETPID   = 2;    /* get current process id */
+    public static final int SYSCALL_COREDUMP = 9;    /* print process state and exit */
+    
     //======================================================================
     //Member variables
     //----------------------------------------------------------------------
 
+	
     /**
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
@@ -50,6 +61,7 @@ public class SOS
         //Init member list
         m_CPU = c;
         m_RAM = r;
+        m_CPU.registerTrapHandler(this);
     }//SOS ctor
     
     /**
@@ -134,6 +146,40 @@ public class SOS
     	m_CPU.setSP(0);
     	m_CPU.setBASE(loc);
     	m_CPU.setLIM(loc + size);
+    }
+    
+
+	@Override
+	public void interruptIllegalMemoryAccess(int addr) {
+		// TODO Auto-generated method stub
+		System.out.println("Illegal Memory Access Exception!");
+        System.exit(0);
+	}
+
+	@Override
+	public void interruptDivideByZero() {
+		// TODO Auto-generated method stub
+		System.out.println("Illegal Divide by Zero Exception!");
+        System.exit(0);
+	}
+
+	@Override
+	public void interruptIllegalInstruction(int[] instr) {
+		// TODO Auto-generated method stub
+		System.out.println("Illegal Instruction Exception!");
+        System.exit(0);
+		
+	}
+
+	
+	 //<insert header comment here>
+	@Override
+    public void systemCall()
+    {
+		//TODO
+        //%%%REPLACE THESE LINES WITH APPROPRIATE CODE
+        System.out.println("TRAP handled!");
+        System.exit(0);
     }
         
     /*======================================================================

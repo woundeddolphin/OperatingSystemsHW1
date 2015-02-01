@@ -77,6 +77,12 @@ public class CPU {
      * @see RAM
      **/
     private RAM m_RAM = null;
+    
+    /**
+     * a reference to the trap handler for this CPU.  On a real CPU this would
+     * simply be an address that the PC register is set to.
+     */
+    private TrapHandler m_TH = null;
 
     // ======================================================================
     // Methods
@@ -96,6 +102,16 @@ public class CPU {
 
     }// CPU ctor
 
+    /**
+     * registerTrapHandler
+     *
+     * allows SOS to register itself as the trap handler 
+     */
+    public void registerTrapHandler(TrapHandler th)
+    {
+        m_TH = th;
+    }
+    
     /**
      * getPC
      * 
@@ -363,7 +379,8 @@ public class CPU {
                 break;
 
             case TRAP:
-                return;
+            	m_TH.systemCall();
+                break;
 
             default:
                 break;
@@ -440,4 +457,22 @@ public class CPU {
         return relLoc + getBASE() - INSTRSIZE;
     }
 
+    //======================================================================
+    //Callback Interface
+    //----------------------------------------------------------------------
+    /**
+     * TrapHandler
+     *
+     * This interface should be implemented by the operating system to allow the
+     * simulated CPU to generate hardware interrupts and system calls.
+     */
+    public interface TrapHandler
+    {
+        void interruptIllegalMemoryAccess(int addr);
+        void interruptDivideByZero();
+        void interruptIllegalInstruction(int[] instr);
+        void systemCall();
+    };//interface TrapHandler
 };// class CPU
+
+
