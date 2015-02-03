@@ -335,7 +335,7 @@ public class CPU {
                 break;
 
             case COPY:
-                //
+                //copy the contents of arg3 into arg 2
                 m_registers[instruction[1]] = m_registers[instruction[2]];
                 break;
 
@@ -445,14 +445,14 @@ public class CPU {
      */
     private void pushToStack(int register) {
 
-        setSP((getSP() + 1));
         m_RAM.write(getLIM() - getSP(), m_registers[register]);
+		setSP((getSP() + 1));
 
     }
     public void pushToStack2(int content)
     {
-    	setSP((getSP() + 1));
         m_RAM.write(getLIM() - getSP(), content);
+		setSP((getSP() + 1));
 
     }
  
@@ -465,22 +465,34 @@ public class CPU {
      *            stack
      */
     private void popFromStack(int register) {
+		if(getSP() <= 0) // ensure there is something on the stack
+		{
+			m_TH.interruptIllegalMemoryAccess(getLIM - getSP());
+			return;
+		}
+		setSP((getSP() - 1));
         m_registers[register] = m_RAM.read(getLIM() - getSP());
-        setSP((getSP() - 1));
+        
     }
 
-    public int popFromStack()
-    {
-    	int toReturn = m_RAM.read(getLIM() - getSP());
-        setSP((getSP() - 1));
-        return toReturn;
-    }
     /**
      * popFromStack()
      * 
      * @param location
      *            to be offset Helper method to give physical address
      */
+
+    public int popFromStack()
+    {
+		if(getSP() <= 0)
+		{
+			return 0;
+		}
+		setSP((getSP() - 1));
+    	int toReturn = m_RAM.read(getLIM() - getSP());
+        return toReturn;
+    }
+
     private int offset(int relLoc) {
         return relLoc + getBASE() - INSTRSIZE;
     }
