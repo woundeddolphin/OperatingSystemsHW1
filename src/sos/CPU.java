@@ -65,7 +65,7 @@ public class CPU {
     /**
      * specifies whether the CPU should output details of its work
      **/
-    private boolean m_verbose = false;
+    private boolean m_verbose = true;
 
     /**
      * This array contains all the registers on the "chip".
@@ -467,7 +467,7 @@ public class CPU {
     private void popFromStack(int register) {
 		if(getSP() <= 0) // ensure there is something on the stack
 		{
-			m_TH.interruptIllegalMemoryAccess(getLIM - getSP());
+			m_TH.interruptIllegalMemoryAccess(getLIM() - getSP());
 			return;
 		}
 		setSP((getSP() - 1));

@@ -213,12 +213,6 @@ public class SOS implements CPU.TrapHandler
 			break;
 		}
 	}
-	
-	/**
-	 * exit()
-	 * helper method to exit program
-	 * 
-	 */
 	private void exit()
 	{
 		if(m_verbose)
@@ -227,24 +221,11 @@ public class SOS implements CPU.TrapHandler
 		}
 	    System.exit(0);
 	}
-	
-	/**
-	 * output()
-	 * helper method to write to console
-	 * 
-	 */
 	private void output()
 	{
 		int a = m_CPU.popFromStack();
 		System.out.println("OUTPUT: " + a);
 	}
-	
-	/**
-	 * pid()
-	 * helper method to get process ID 
-	 * currently dummied to just produce 42
-	 * 
-	 */
 	private void pid ()
 	{
 		int a = 42;
@@ -255,12 +236,6 @@ public class SOS implements CPU.TrapHandler
 		}
 
 	}
-	/**
-	 * coreDump()
-	 * helper method to give infomation about state of the cpu and stack
-	 * before exiting 
-	 * 
-	 */
 	private void coreDump()
 	{
 		System.out.println("CORE DUMP: ");
