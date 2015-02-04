@@ -1,4 +1,4 @@
-package sos;
+package src.sos;
 
 import java.util.*;
 
@@ -100,7 +100,6 @@ public class CPU {
             m_registers[i] = 0;
         }
         m_RAM = ram;
-
     }// CPU ctor
 
     /**
@@ -300,6 +299,10 @@ public class CPU {
             switch (instruction[0]) {
             case SET:
                 // place value of arg2 into arg1
+                if (instruction[3] != 99999)
+                {
+                    m_TH.interruptIllegalInstruction(instruction);
+                }
                 m_registers[instruction[1]] = instruction[2];
                 break;
 
@@ -323,15 +326,15 @@ public class CPU {
 
             case DIV:
                 // divide arg2 and arg3
-            	if (m_registers[instruction[3]]==0)
-            	{
-            		m_TH.interruptDivideByZero();
-            	}
-            	else
-            	{
-            		m_registers[instruction[1]] = m_registers[instruction[2]]
+                if (m_registers[instruction[3]]==0)
+                {
+                    m_TH.interruptDivideByZero();
+                }
+                else
+                {
+                    m_registers[instruction[1]] = m_registers[instruction[2]]
                         / m_registers[instruction[3]];
-            	}
+                }
                 break;
 
             case COPY:
@@ -387,7 +390,7 @@ public class CPU {
                 break;
 
             case TRAP:
-            	m_TH.systemCall();
+                m_TH.systemCall();
                 break;
 
             default:
@@ -414,22 +417,22 @@ public class CPU {
 
     private boolean checkAccess(int register) {
         if ((register + getBASE()) < getBASE()) {
-        	if (m_verbose)
-        	{
-        		System.out
+            if (m_verbose)
+            {
+                System.out
                     .println("Attempting to access register that is less than" +
                             " base register");
-        	}
-        	m_TH.interruptIllegalMemoryAccess(register);
+            }
+            m_TH.interruptIllegalMemoryAccess(register);
             return false;
         } else if ((register + getBASE()) > getLIM()) {
-        	if(m_verbose)
-        	{
-        		System.out
+            if(m_verbose)
+            {
+                System.out
                     .println("Attempting to access register that is greater" + 
                             " than the limit register");
-        	}
-        	m_TH.interruptIllegalMemoryAccess(register);
+            }
+            m_TH.interruptIllegalMemoryAccess(register);
             return false;
         }
 
@@ -444,16 +447,13 @@ public class CPU {
      *            stuff onto the stack
      */
     private void pushToStack(int register) {
-
         m_RAM.write(getLIM() - getSP(), m_registers[register]);
-		setSP((getSP() + 1));
-
+        setSP((getSP() + 1));
     }
     public void pushToStack2(int content)
     {
         m_RAM.write(getLIM() - getSP(), content);
-		setSP((getSP() + 1));
-
+        setSP((getSP() + 1));
     }
  
 
@@ -465,12 +465,12 @@ public class CPU {
      *            stack
      */
     private void popFromStack(int register) {
-		if(getSP() <= 0) // ensure there is something on the stack
-		{
-			m_TH.interruptIllegalMemoryAccess(getLIM() - getSP());
-			return;
-		}
-		setSP((getSP() - 1));
+        if(getSP() <= 0) // ensure there is something on the stack
+        {
+            //m_TH.interruptIllegalInstruction( );
+            return;
+        }
+        setSP((getSP() - 1));
         m_registers[register] = m_RAM.read(getLIM() - getSP());
         
     }
@@ -484,12 +484,12 @@ public class CPU {
 
     public int popFromStack()
     {
-		if(getSP() <= 0)
-		{
-			return 0;
-		}
-		setSP((getSP() - 1));
-    	int toReturn = m_RAM.read(getLIM() - getSP());
+        if(getSP() <= 0)
+        {
+            return 0;
+        }
+        setSP((getSP() - 1));
+        int toReturn = m_RAM.read(getLIM() - getSP());
         return toReturn;
     }
 

@@ -1,4 +1,4 @@
-package sos;
+package src.sos;
 
 import java.util.*;
 
@@ -13,7 +13,7 @@ import java.util.*;
  * @author Justice Nichols
  * @author Krismy Alfaro
  * @author Matthew Farr
- * @author Zach Pearson
+ * @author Zak Pearson
  */
    
 public class SOS implements CPU.TrapHandler
@@ -197,20 +197,20 @@ public class SOS implements CPU.TrapHandler
 		int opCode = m_CPU.popFromStack();
 		switch (opCode)
 		{
-		case SYSCALL_EXIT:
-			exit();
-			break;
-		case SYSCALL_OUTPUT:
-			output();
-			break;
-		case SYSCALL_GETPID:
-			pid();
-			break;
-		case SYSCALL_COREDUMP:
-			coreDump();
-			break;
-		default:
-			break;
+    		case SYSCALL_EXIT:
+    			exit();
+    			break;
+    		case SYSCALL_OUTPUT:
+    			output();
+    			break;
+    		case SYSCALL_GETPID:
+    			pid();
+    			break;
+    		case SYSCALL_COREDUMP:
+    			coreDump();
+    			break;
+    		default:
+    			break;
 		}
 	}
 	private void exit()
@@ -240,9 +240,11 @@ public class SOS implements CPU.TrapHandler
 	{
 		System.out.println("CORE DUMP: ");
 		m_CPU.regDump();
-		for (int i = 0; i < 3; i++)
+		int i = 0;
+		while (i < 3 && m_CPU.getSP() > 0)
 		{
-			System.out.println("Stack " + i + " " + m_CPU.popFromStack());;
+		    System.out.println("Stack " + (m_CPU.getSP() - 1 ) + " " + m_CPU.popFromStack());
+		    i++;
 		}
 		exit();
 	}

@@ -1,6 +1,6 @@
 #This program calculates the current
 #process id and prints it via a system call
-#@author Zach Pearson
+#@author Zak Pearson
 #@author Justice Nichols    
 #get process id system call
 SET  r0 2   #r0 = SYSCALL_GETPID
@@ -17,6 +17,9 @@ PUSH r0
 TRAP
 
 #core dump system call
+
+SET R1 3
+PUSH R1
 SET R0 9
 PUSH R0
 TRAP
