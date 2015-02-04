@@ -157,14 +157,28 @@ public class SOS implements CPU.TrapHandler
      * Interrupt Handlers
      *----------------------------------------------------------------------
      */
-
+    
+    /**
+     * interruptIllegalMemoryAcess
+     * Prints error message when useer touches memory that is not theirs.
+     *
+     * @param addr the address that was trying to be accessed
+     * @return void
+     */
     @Override
 	public void interruptIllegalMemoryAccess(int addr) {
 		// TODO Auto-generated method stub
 		System.out.println("Illegal Memory Access Exception!");
         System.exit(0);
 	}
-
+    
+    /**
+     * interruptDivideByZero
+     * Prints error message if division by zero is encountered
+     * 
+     * @param void
+     * @return void
+     */
 	@Override
 	public void interruptDivideByZero() {
 		// TODO Auto-generated method stub
@@ -172,6 +186,13 @@ public class SOS implements CPU.TrapHandler
         System.exit(0);
 	}
 
+    /**
+     * interuptIllegalInstruction
+     * Prints error message if there is something wrong with the fetched instruction
+     * 
+     * @param insr The bad instruction
+     * @return void
+     */
 	@Override
 	public void interruptIllegalInstruction(int[] instr) {
 		// TODO Auto-generated method stub
@@ -186,7 +207,12 @@ public class SOS implements CPU.TrapHandler
      */
 	    
 	/**
+     * systemCall
 	 * call backs for handling trap from CPU
+     * 
+     * @param void
+     *
+     * @return void
 	 * 
 	 */
 
@@ -213,6 +239,13 @@ public class SOS implements CPU.TrapHandler
     			break;
 		}
 	}
+    /**
+     * exit
+     * Current exits the simulation
+     *
+     * @param void
+     * @return void
+     */
 	private void exit()
 	{
 		if(m_verbose)
@@ -221,11 +254,27 @@ public class SOS implements CPU.TrapHandler
 		}
 	    System.exit(0);
 	}
+    /**
+     * output
+     * prints pops parameter from stack and prints to terminal
+     *
+     * @param void the parameter is the last thing pushed on the stack
+     *
+     * @return void
+     */
 	private void output()
 	{
 		int a = m_CPU.popFromStack();
 		System.out.println("OUTPUT: " + a);
 	}
+    /**
+     * pid
+     * pushes program id onto the stack
+     *
+     * @param void
+     *
+     * @return void return value is pushed onto the stack
+     */
 	private void pid ()
 	{
 		int a = 42;
@@ -236,6 +285,14 @@ public class SOS implements CPU.TrapHandler
 		}
 
 	}
+    /**
+     * coreDump
+     * prints current register states and last 3 things pushed on the stack to the terminal
+     *
+     * @param void
+     *
+     * @return void
+     */
 	private void coreDump()
 	{
 		System.out.println("CORE DUMP: ");
