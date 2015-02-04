@@ -298,11 +298,6 @@ public class CPU {
             // format of instruction: opcode, arg1, arg2, arg3
             switch (instruction[0]) {
             case SET:
-                // place value of arg2 into arg1
-                if (instruction[3] != 99999)
-                {
-                    m_TH.interruptIllegalInstruction(instruction);
-                }
                 m_registers[instruction[1]] = instruction[2];
                 break;
 

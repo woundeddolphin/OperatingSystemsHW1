@@ -1,0 +1,20 @@
+#BlueJ class context
+comment0.params=size\ latency
+comment0.target=RAM(int,\ int)
+comment0.text=\n\ the\ constructor\ does\ nothing\ special\n\n\ @param\ size\ number\ of\ integers\ ("words")\ in\ ram\n\ @param\ latency\ the\ number\ of\ nanoseconds\ to\ delay\ for\ RAM\ latency\n
+comment1.params=
+comment1.target=int\ getSize()
+comment1.text=\n\ getSize\n\n\ @return\ the\ size\ of\ the\ RAM\ expressed\ as\ a\ number\ of\ integers\n\n
+comment2.params=
+comment2.target=int\ getLatency()
+comment2.text=\n\ getLatency\n\n\ @return\ the\ time\ in\ nanoseconds\ required\ to\ retrieve\ a\ value\ from\ RAM\n\n
+comment3.params=pc
+comment3.target=int[]\ fetch(int)
+comment3.text=\n\ fetch\n\ \n\ retrieves\ an\ entire\ instruction\ from\ the\ simulated\ RAM.\ \ \n\n\ @see\ CPU\#INSTRSIZE\n
+comment4.params=addr
+comment4.target=int\ read(int)
+comment4.text=\n\ read\n\n\ loads\ an\ integer\ from\ the\ simulated\ RAM\n\n\ @param\ addr\ \ the\ location\ to\ retrieve\ from\n\ @return\ \ \ \ \ \ the\ value\ at\ the\ given\ location\n
+comment5.params=addr\ val
+comment5.target=void\ write(int,\ int)
+comment5.text=\n\ write\n\n\ saves\ an\ integer\ to\ the\ simulated\ RAM\n\n\ @param\ addr\ \ the\ addrss\ to\ write\ to\n\ @param\ val\ \ \ the\ value\ to\ write\n
+numComments=6

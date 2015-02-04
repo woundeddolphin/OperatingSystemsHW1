@@ -1,6 +1,6 @@
 #This program calculates the current
 #process id and prints it via a system call
-#@author Zach Pearson
+#@author Zak Pearson
 #@author Justice Nichols
 
 #get process id system call

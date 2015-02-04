@@ -8,5 +8,6 @@ ADD R1 R2 R1   #increment R1
 BNE R1 R3 loop #repeat until R1=R3
 
 
-
+#SET R0 0
+#PUSH R0
 TRAP

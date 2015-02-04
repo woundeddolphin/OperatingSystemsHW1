@@ -18,7 +18,7 @@ import java.util.*;
    
 public class SOS implements CPU.TrapHandler
 {
-	//======================================================================
+    //======================================================================
     //Constants
     //----------------------------------------------------------------------
 
@@ -32,12 +32,12 @@ public class SOS implements CPU.TrapHandler
     //Member variables
     //----------------------------------------------------------------------
 
-	
+    
     /**
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
      **/
-    public static final boolean m_verbose = false;
+    public static final boolean m_verbose = true;
     
     /**
      * The CPU the operating system is managing.
@@ -122,15 +122,15 @@ public class SOS implements CPU.TrapHandler
      * Helper method to initialize system registers with appropriate values
      */
     public void createProcess(Program prog, int allocSize)
-    {    	
-    	//compile the prog into an array of int
-    	int[] programArray = prog.export();  
-    	int location = 8;
-    	
-    	for(int i = 0; i < programArray.length; i++){ //move the program into ram
-    		m_RAM.write(location + i, programArray[i]);
-    	}
-    	intializeRegisters(location, allocSize); // initialize registers
+    {       
+        //compile the prog into an array of int
+        int[] programArray = prog.export();  
+        int location = 8;
+        
+        for(int i = 0; i < programArray.length; i++){ //move the program into ram
+            m_RAM.write(location + i, programArray[i]);
+        }
+        intializeRegisters(location, allocSize); // initialize registers
         
     }//createProcess
     
@@ -143,14 +143,14 @@ public class SOS implements CPU.TrapHandler
      * Helper method to initialize system registers with appropriate values
      */
     private void intializeRegisters(int loc, int size){
-    	m_CPU.setPC(loc);
-    	m_CPU.setSP(0);
-    	m_CPU.setBASE(loc);
-    	m_CPU.setLIM(loc + size);
+        m_CPU.setPC(loc);
+        m_CPU.setSP(0);
+        m_CPU.setBASE(loc);
+        m_CPU.setLIM(loc + size);
     }
     
 
-	
+    
 
 
     /*======================================================================
@@ -166,11 +166,11 @@ public class SOS implements CPU.TrapHandler
      * @return void
      */
     @Override
-	public void interruptIllegalMemoryAccess(int addr) {
-		// TODO Auto-generated method stub
-		System.out.println("Illegal Memory Access Exception!");
+    public void interruptIllegalMemoryAccess(int addr) {
+        // TODO Auto-generated method stub
+        System.out.println("Illegal Memory Access Exception!");
         System.exit(0);
-	}
+    }
     
     /**
      * interruptDivideByZero
@@ -179,12 +179,12 @@ public class SOS implements CPU.TrapHandler
      * @param void
      * @return void
      */
-	@Override
-	public void interruptDivideByZero() {
-		// TODO Auto-generated method stub
-		System.out.println("Illegal Divide by Zero Exception!");
+    @Override
+    public void interruptDivideByZero() {
+        // TODO Auto-generated method stub
+        System.out.println("Illegal Divide by Zero Exception!");
         System.exit(0);
-	}
+    }
 
     /**
      * interuptIllegalInstruction
@@ -193,52 +193,59 @@ public class SOS implements CPU.TrapHandler
      * @param insr The bad instruction
      * @return void
      */
-	@Override
-	public void interruptIllegalInstruction(int[] instr) {
-		// TODO Auto-generated method stub
-		System.out.println("Illegal Instruction Exception!");
+    @Override
+    public void interruptIllegalInstruction(int[] instr) {
+        // TODO Auto-generated method stub
+        System.out.println("Illegal Instruction Exception!");
         System.exit(0);
-		
-	}
+        
+    }
     
     /*======================================================================
      * System Calls
      *----------------------------------------------------------------------
      */
-	    
-	/**
+        
+    /**
      * systemCall
-	 * call backs for handling trap from CPU
+     * call backs for handling trap from CPU
      * 
-     * @param void
+       * @param void
      *
      * @return void
-	 * 
-	 */
+     * 
+     */
 
-	@Override
-	public void systemCall()
-	{
-		//TODO
-		int opCode = m_CPU.popFromStack();
-		switch (opCode)
-		{
-    		case SYSCALL_EXIT:
-    			exit();
-    			break;
-    		case SYSCALL_OUTPUT:
-    			output();
-    			break;
-    		case SYSCALL_GETPID:
-    			pid();
-    			break;
-    		case SYSCALL_COREDUMP:
-    			coreDump();
-    			break;
-    		default:
-    			break;
-		}
-	}
+    @Override
+    public void systemCall()
+    {
+        int opCode;
+        //error if nothign is on the stack when a trap is called
+        if (m_CPU.getSP() == 0)
+        {
+            //for now just print error messaage:
+            System.out.println("Illegal Instruction Exception!");
+            System.exit(0);
+        }
+        opCode = m_CPU.popFromStack();
+        switch (opCode)
+        {
+            case SYSCALL_EXIT:
+                exit();
+                break;
+            case SYSCALL_OUTPUT:
+                output();
+                break;
+            case SYSCALL_GETPID:
+                pid();
+                break;
+            case SYSCALL_COREDUMP:
+                coreDump();
+                break;
+            default:
+                break;
+        }
+    }
     /**
      * exit
      * Current exits the simulation
@@ -246,14 +253,14 @@ public class SOS implements CPU.TrapHandler
      * @param void
      * @return void
      */
-	private void exit()
-	{
-		if(m_verbose)
-		{
-			System.out.println("Exit handled!");
-		}
-	    System.exit(0);
-	}
+    private void exit()
+    {
+        if(m_verbose)
+        {
+            System.out.println("Exit handled!");
+        }
+        System.exit(0);
+    }
     /**
      * output
      * prints pops parameter from stack and prints to terminal
@@ -262,11 +269,11 @@ public class SOS implements CPU.TrapHandler
      *
      * @return void
      */
-	private void output()
-	{
-		int a = m_CPU.popFromStack();
-		System.out.println("OUTPUT: " + a);
-	}
+    private void output()
+    {
+        int a = m_CPU.popFromStack();
+        System.out.println("OUTPUT: " + a);
+    }
     /**
      * pid
      * pushes program id onto the stack
@@ -275,16 +282,16 @@ public class SOS implements CPU.TrapHandler
      *
      * @return void return value is pushed onto the stack
      */
-	private void pid ()
-	{
-		int a = 42;
-		m_CPU.pushToStack2(a);
-		if(m_verbose)
-		{
-			System.out.println("PID = " + a);
-		}
+    private void pid ()
+    {
+        int a = 42;
+        m_CPU.pushToStack2(a);
+        if(m_verbose)
+        {
+            System.out.println("PID = " + a);
+        }
 
-	}
+    }
     /**
      * coreDump
      * prints current register states and last 3 things pushed on the stack to the terminal
@@ -293,18 +300,18 @@ public class SOS implements CPU.TrapHandler
      *
      * @return void
      */
-	private void coreDump()
-	{
-		System.out.println("CORE DUMP: ");
-		m_CPU.regDump();
-		int i = 0;
-		while (i < 3 && m_CPU.getSP() > 0)
-		{
-		    System.out.println("Stack " + (m_CPU.getSP() - 1 ) + " " + m_CPU.popFromStack());
-		    i++;
-		}
-		exit();
-	}
-		
+    private void coreDump()
+    {
+        System.out.println("CORE DUMP: ");
+        m_CPU.regDump();
+        int i = 0;
+        while (i < 3 && m_CPU.getSP() > 0)
+        {
+            System.out.println("Stack " + (m_CPU.getSP()) + " " + m_CPU.popFromStack());
+            i++;
+        }
+        exit();
+    }
+        
     
 };//class SOS
