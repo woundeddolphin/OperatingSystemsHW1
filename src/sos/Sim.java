@@ -1,4 +1,4 @@
-package src.sos;
+package sos;
 
 import java.util.*;
 
