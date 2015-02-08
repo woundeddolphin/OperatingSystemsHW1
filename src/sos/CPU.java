@@ -65,7 +65,7 @@ public class CPU {
     /**
      * specifies whether the CPU should output details of its work
      **/
-    private boolean m_verbose = true;
+    private boolean m_verbose = false;
 
     /**
      * This array contains all the registers on the "chip".
@@ -445,6 +445,7 @@ public class CPU {
         m_RAM.write(getLIM() - getSP(), m_registers[register]);
         setSP((getSP() + 1));
     }
+    
     public void pushToStack2(int content)
     {
         m_RAM.write(getLIM() - getSP(), content);
