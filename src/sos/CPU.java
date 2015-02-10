@@ -17,6 +17,7 @@ import java.util.*;
  * @author Krismy Alfaro
  * @author Matthew Farr
  * @author Zach Pearson
+ * @author Matt Wellnitz
  */
 
 public class CPU {
