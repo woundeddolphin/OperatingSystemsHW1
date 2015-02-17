@@ -90,8 +90,10 @@ public class KeyboardDevice implements Device
 	     * As a result, the function does not check to make sure that the
 	     * device is ready for this request (that's the OS's job).
 	     */
+	   
 	    public void write(int addr /*not used*/, int data)
 	    {
-	        System.out.println("CONSOLE: " + data);
+	    	
+	        //System.out.println("CONSOLE: " + data);
 	    }
 }

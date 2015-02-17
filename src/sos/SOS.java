@@ -184,10 +184,16 @@ public class SOS implements CPU.TrapHandler
 
     }//printProcessTable
 
-    //<method header needed>
+	/**
+	 * removeCurrentProcess
+	 * 
+	 * removes the current processes from m_processes
+	 * and calls scheduleNewProcess to pick a new one
+	 */
     public void removeCurrentProcess()
     {
-        //%%%You will implement this method
+    	m_processes.remove(m_currProcess);
+    	scheduleNewProcess();
     }//removeCurrentProcess
 
     /**
@@ -217,11 +223,42 @@ public class SOS implements CPU.TrapHandler
         return null;        // no processes are Ready
     }//getRandomProcess
     
-    //<method header needed>
+	/**
+	 * scheduleNewProcess
+	 * 
+	 * Selects a new process to run and runs it
+	 */
     public void scheduleNewProcess()
     {
-        //%%%You will implement this method
-
+    	if (m_processes.isEmpty())
+    	{
+    		if(m_verbose)
+    		{
+    			System.out.println("No processes left exit");
+    		}
+    		syscallExit();
+    	}
+    	boolean allBlocked = true;
+    	for(ProcessControlBlock i: m_processes)
+    	{
+    		if (!i.isBlocked())
+    		{
+    			allBlocked = false;
+    			break;
+    		}
+    	}
+    	if(allBlocked)
+    	{
+    		if(m_verbose)
+    		{
+    			System.out.println("All proccesses blocked" + "This shouldn't happen! (yet)");
+    		}
+    		syscallExit();
+    	}
+    	m_currProcess.save(m_CPU);
+    	m_currProcess = getRandomProcess();
+    	m_currProcess.restore(m_CPU);
+    	//TODO
     }//scheduleNewProcess
 
     /**
@@ -255,12 +292,32 @@ public class SOS implements CPU.TrapHandler
     public void createProcess(Program prog, int allocSize)
     {       
         //compile the prog into an array of int
-        int[] programArray = prog.export();  
-        int location = 8;
+        int[] programArray = prog.export(); 
+        
+        //set the location for the allocation to be at the next location
+        int location = m_nextLoadPos;
+        
+        //set the next location for next time
+        m_nextLoadPos += allocSize;
+        
+        
+        if (m_nextLoadPos > m_RAM.getSize())
+        {
+        	System.out.println("ERROR: Not enough avaliable RAM: " + m_nextLoadPos + " out of " + m_RAM.getSize());
+        	this.syscallExit();
+        }
         
         for(int i = 0; i < programArray.length; i++){ //move the program into ram
             m_RAM.write(location + i, programArray[i]);
         }
+        if (m_currProcess != null)
+        {
+        	m_currProcess.save(m_CPU);
+        }
+        
+        m_currProcess = new ProcessControlBlock(m_nextProcessID);
+        m_processes.add(m_currProcess);
+        m_nextProcessID++;
         intializeRegisters(location, allocSize); // initialize registers
         
     }//createProcess
