@@ -53,7 +53,7 @@ public class SOS implements CPU.TrapHandler
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
      **/
-    public static final boolean m_verbose = true;
+    public static final boolean m_verbose = false;
     
     /**
      * The CPU the operating system is managing.
@@ -271,7 +271,8 @@ public class SOS implements CPU.TrapHandler
     public void addProgram(Program prog)
     {
         m_programs.add(prog);
-    }//addProgram    
+    }//addProgram  
+    
     /*======================================================================
      * Program Management Methods
      *----------------------------------------------------------------------
@@ -331,7 +332,7 @@ public class SOS implements CPU.TrapHandler
         m_CPU.setSP(0);
         m_CPU.setBASE(loc);
         m_CPU.setLIM(loc + size);
-    }
+    }//initialize registers
     
 
     
@@ -347,6 +348,7 @@ public class SOS implements CPU.TrapHandler
      * Prints error message when useer touches memory that is not theirs.
      *
      * @param addr the address that was trying to be accessed
+     * 
      * @return void
      */
     @Override
@@ -354,13 +356,14 @@ public class SOS implements CPU.TrapHandler
         // TODO Auto-generated method stub
         System.out.println("Illegal Memory Access Exception!");
         System.exit(0);
-    }
+    }//interuptIllegalMemoryAccess
     
     /**
      * interruptDivideByZero
      * Prints error message if division by zero is encountered
      * 
      * @param void
+     * 
      * @return void
      */
     @Override
@@ -375,6 +378,7 @@ public class SOS implements CPU.TrapHandler
      * Prints error message if there is something wrong with the fetched instruction
      * 
      * @param insr The bad instruction
+     * 
      * @return void
      */
     @Override
@@ -383,7 +387,7 @@ public class SOS implements CPU.TrapHandler
         System.out.println("Illegal Instruction Exception!");
         System.exit(0);
         
-    }
+    }//interruptIllegalInstruction
     
     /*======================================================================
      * System Calls
@@ -394,7 +398,7 @@ public class SOS implements CPU.TrapHandler
      * systemCall
      * call backs for handling trap from CPU
      * 
-       * @param void
+     * @param void
      *
      * @return void
      * 
@@ -424,7 +428,7 @@ public class SOS implements CPU.TrapHandler
                 syscallPid();
                 break;
             case SYSCALL_COREDUMP:
-                coreDump();
+                syscallCoreDump();
                 break;
             case SYSCALL_OPEN:
             	syscallOpen();
@@ -447,12 +451,14 @@ public class SOS implements CPU.TrapHandler
             default:
                 break;
         }
-    }
+    } //syscall
+    
     /**
-     * exit
+     * syscallExit
      * Current exits the simulation
      *
      * @param void
+     * 
      * @return void
      */
     private void syscallExit()
@@ -462,9 +468,10 @@ public class SOS implements CPU.TrapHandler
         m_processes.remove(m_currProcess);
         scheduleNewProcess();
         
-    }
+    }//syscallExit
+    
     /**
-     * output
+     * syscallOutput
      * prints pops parameter from stack and prints to terminal
      *
      * @param void the parameter is the last thing pushed on the stack
@@ -475,9 +482,10 @@ public class SOS implements CPU.TrapHandler
     {
         int a = m_CPU.popFromStack();
         System.out.println("OUTPUT: " + a);
-    }
+    }//syscallOutput
+    
     /**
-     * pid
+     * syscallPid
      * pushes program id onto the stack
      *
      * @param void
@@ -490,17 +498,17 @@ public class SOS implements CPU.TrapHandler
         m_CPU.pushToStack2(a);
 
         debugPrintln("PID = " + a);
-
-    }
+    }//syscallPid
+    
     /**
-     * coreDump
+     * syscallCoreDump
      * prints current register states and last 3 things pushed on the stack to the terminal
      *
      * @param void
      *
      * @return void
      */
-    private void coreDump()
+    private void syscallCoreDump()
     {
         System.out.println("CORE DUMP: ");
         m_CPU.regDump();
@@ -511,8 +519,17 @@ public class SOS implements CPU.TrapHandler
             i++;
         }
         syscallExit();
-    }
+    }//syscallCoreDump
     
+    /**
+     * syscallHelper
+     * checks to see if device exists in m_device and
+     * returns that device
+     * 
+     * @param void
+     * 
+     * @return DeviceInfo
+     */
     private DeviceInfo syscallHelper()
     {
 	      int dNUM =  m_CPU.popFromStack();
@@ -527,9 +544,18 @@ public class SOS implements CPU.TrapHandler
 	   	  }
 	   	  return temp;
    	  
-    }
+    }//syscallhelper
     
-    
+    /**
+     * syscallOpen
+     * opens a device specified by the stack and handles 
+     * some mistakes by pushing error codes
+     * if it succeeds it pushes success to the stack
+     * 
+     * @param void
+     * 
+     * @return void
+     */   
    private void syscallOpen()
    {
 	  DeviceInfo d = syscallHelper();
@@ -553,14 +579,23 @@ public class SOS implements CPU.TrapHandler
 			  m_currProcess.block(m_CPU, d.getDevice(), SYSCALL_OPEN,-1);
 			  m_CPU.pushToStack2(CODE_SUCCESS);
 			  scheduleNewProcess();
-			  //m_CPU.pushToStack2(CODE_NOT_SHARABLE);
 			  return;
 		  }
 	  }
 	  d.addProcess(this.m_currProcess);
 	  m_CPU.pushToStack2(CODE_SUCCESS);
-   }
+   }//syscallOpen
    
+   /**
+    * syscallClose
+    * closes a device specified by the stack and handles 
+    * some mistakes by pushing error codes
+    * if it succeeds it pushes success to the stack
+    * 
+    * @param void
+    * 
+    * @return void
+    */ 
    private void syscallClose()
    {
 	   DeviceInfo d = syscallHelper();
@@ -582,8 +617,19 @@ public class SOS implements CPU.TrapHandler
 	}
 	m_CPU.pushToStack2(CODE_SUCCESS);
 
-   }
+   }//close
    
+   /**
+    * syscallOpen
+    * writes to a device specified by the stack at the location and 
+    * with the value specified by the stack and handles 
+    * some mistakes by pushing error codes
+    * if it succeeds it pushes success to the stack
+    * 
+    * @param void
+    * 
+    * @return void
+    */ 
    private void syscallWrite()
    {
 	   int value = m_CPU.popFromStack();
@@ -608,6 +654,17 @@ public class SOS implements CPU.TrapHandler
 	   m_CPU.pushToStack2(CODE_SUCCESS);
    }
    
+   /**
+    * syscallOpen
+    * reads from a device at a location
+    * specified by the stack and handles 
+    * some mistakes by pushing error codes
+    * if it succeeds it pushes success to the stack
+    * 
+    * @param void
+    * 
+    * @return void
+    */ 
    private void syscallRead()
    {
 	   int address = m_CPU.popFromStack();
@@ -640,6 +697,10 @@ public class SOS implements CPU.TrapHandler
     * via {@link #addProgram}.  Limits are put into place to ensure that each
     * process is run an equal number of times.  If no programs have been
     * registered then the simulation is aborted with a fatal error.
+    * 
+    * @param void
+    * 
+    * @return void
     *
     */
    private void syscallExec()
@@ -696,6 +757,10 @@ public class SOS implements CPU.TrapHandler
  * syscallYield
  * 
  *    changes the state of m_currProcess from running to ready
+ *    
+ *    @param void
+ *    
+ *    @return void
  */
    private void syscallYield()
    {
@@ -736,13 +801,7 @@ public class SOS implements CPU.TrapHandler
        return selected;
    }//selectBlockedProcess
    
-   
-   
-   
-   
-   
-    
-    
+
     /**
      * registerDevice
      *
@@ -756,6 +815,7 @@ public class SOS implements CPU.TrapHandler
     {
         m_devices.add(new DeviceInfo(dev, id));
     }//registerDevice
+    
   //======================================================================
     // Inner Classes
     //----------------------------------------------------------------------
