@@ -258,7 +258,6 @@ public class SOS implements CPU.TrapHandler
     	m_currProcess.save(m_CPU);
     	m_currProcess = getRandomProcess();
     	m_currProcess.restore(m_CPU);
-    	//TODO
     }//scheduleNewProcess
 
     /**
@@ -441,6 +440,12 @@ public class SOS implements CPU.TrapHandler
             	break;
             case SYSCALL_WRITE:
             	syscallWrite();
+            	break;
+            case SYSCALL_EXEC:
+            	syscallExec();
+            	break;
+            case SYSCALL_YIELD:
+            	syscallYield();   
             	break;
             default:
                 break;
@@ -683,11 +688,14 @@ public class SOS implements CPU.TrapHandler
    }//syscallExec
 
 
-   
-   //<method header needed>
+/**
+ * syscallYield
+ * 
+ *    changes the state of m_currProcess from running to ready
+ */
    private void syscallYield()
    {
-       //%%%You will implement this method
+	   scheduleNewProcess();
    }//syscallYield
 
 
