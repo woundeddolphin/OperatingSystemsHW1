@@ -233,10 +233,11 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void scheduleNewProcess()
     {
+    	
     	if (m_processes.isEmpty())
     	{
 
-    		debugPrintln("No processes left exit");
+    		debugPrintln("No more processes to run. Stopping.");
     		System.exit(CODE_SUCCESS);
     	}
     	boolean allBlocked = true;
@@ -253,9 +254,15 @@ public class SOS implements CPU.TrapHandler
     		debugPrintln("All proccesses blocked! " + "This shouldn't happen! (yet)");
     		System.exit(-1);
     	}
+    	
+    	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
     	m_currProcess.save(m_CPU);
     	m_currProcess = getRandomProcess();
-    	debugPrintln("Loaded process: " + m_currProcess.getProcessId());
+    	
+    	if (m_currProcess.getProcessId() != sameCheck) // checks if new pid is same as old
+    	{
+    		debugPrintln("Switched to process " + m_currProcess.getProcessId());
+    	}
     	m_currProcess.restore(m_CPU);
     }//scheduleNewProcess
 
@@ -317,6 +324,9 @@ public class SOS implements CPU.TrapHandler
         m_currProcess = new ProcessControlBlock(m_nextProcessID);
         m_processes.add(m_currProcess);
         m_nextProcessID++;
+        
+        debugPrintln("Installed program of size " + allocSize + " with process id" + m_currProcess.getProcessId() 
+        		+ " at position " + (m_nextLoadPos - allocSize) );
         intializeRegisters(location, allocSize); // initialize registers
         
     }//createProcess
@@ -466,7 +476,7 @@ public class SOS implements CPU.TrapHandler
     private void syscallExit()
     {
 
-        debugPrintln("Exit of process " + m_currProcess.getProcessId() + " handled!");
+        debugPrintln("Removing process with id " + m_currProcess.getProcessId());
         m_processes.remove(m_currProcess);
         scheduleNewProcess();
         
