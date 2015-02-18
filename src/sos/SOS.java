@@ -236,7 +236,7 @@ public class SOS implements CPU.TrapHandler
     		{
     			System.out.println("No processes left exit");
     		}
-    		syscallExit();
+    		System.exit(CODE_SUCCESS);
     	}
     	boolean allBlocked = true;
     	for(ProcessControlBlock i: m_processes)
@@ -253,7 +253,7 @@ public class SOS implements CPU.TrapHandler
     		{
     			System.out.println("All proccesses blocked" + "This shouldn't happen! (yet)");
     		}
-    		syscallExit();
+    		System.exit(-1);
     	}
     	m_currProcess.save(m_CPU);
     	m_currProcess = getRandomProcess();
@@ -462,9 +462,11 @@ public class SOS implements CPU.TrapHandler
     {
         if(m_verbose)
         {
-            System.out.println("Exit handled!");
+            System.out.println("Exit of process " + m_currProcess.getProcessId() + " handled!");
         }
-        System.exit(0);
+        m_processes.remove(m_currProcess);
+        scheduleNewProcess();
+        
     }
     /**
      * output
@@ -489,7 +491,7 @@ public class SOS implements CPU.TrapHandler
      */
     private void syscallPid ()
     {
-        int a = 42;
+        int a = m_currProcess.getProcessId();
         m_CPU.pushToStack2(a);
         if(m_verbose)
         {
@@ -554,7 +556,10 @@ public class SOS implements CPU.TrapHandler
 		  }
 		  else
 		  {
-			  m_CPU.pushToStack2(CODE_NOT_SHARABLE);
+			  d.addProcess(this.m_currProcess);
+			  m_currProcess.block(m_CPU, d.getDevice(), SYSCALL_OPEN,-1);
+			  m_CPU.pushToStack2(CODE_SUCCESS);
+			  //m_CPU.pushToStack2(CODE_NOT_SHARABLE);
 			  return;
 		  }
 	  }
@@ -576,6 +581,7 @@ public class SOS implements CPU.TrapHandler
 		   return;
 	   }
 	d.removeProcess(this.m_currProcess);
+	this.selectBlockedProcess(d.getDevice(), SYSCALL_CLOSE, -1);
 	m_CPU.pushToStack2(CODE_SUCCESS);
 
    }
