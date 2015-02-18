@@ -14,6 +14,14 @@ import java.util.*;
  */
 public class Sim
 {
+	public static final int TORUN = 3;
+	
+	
+	public static final int RUNSIMPLE = 0;
+	public static final int RUNMULTIPLE1 = 1;
+	public static final int RUNMULTIPLE2 = 2;
+	public static final int RUNMULTIPLE3 = 3;
+
     /*======================================================================-
      * Inner Classes
      *----------------------------------------------------------------------
@@ -271,6 +279,22 @@ public class Sim
         try
         {
             //Run the simulation
+        	switch (TORUN) {
+        	case RUNSIMPLE:
+        		runSimple();
+        		break;
+        	case RUNMULTIPLE1:
+        		runMultiple1();
+        		break;
+        	case RUNMULTIPLE2:
+        		runMultiple2();
+        		break;
+        	case RUNMULTIPLE3:
+        		runMultiple3();
+        		break;
+        	default:
+        		break;
+        	}
             runSimple();
 
             //Record the ending time

@@ -192,6 +192,7 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void removeCurrentProcess()
     {
+    	debugPrintln("removed process: " + m_currProcess.getProcessId());
     	m_processes.remove(m_currProcess);
     	scheduleNewProcess();
     }//removeCurrentProcess
@@ -232,10 +233,8 @@ public class SOS implements CPU.TrapHandler
     {
     	if (m_processes.isEmpty())
     	{
-    		if(m_verbose)
-    		{
-    			System.out.println("No processes left exit");
-    		}
+
+    		debugPrintln("No processes left exit");
     		System.exit(CODE_SUCCESS);
     	}
     	boolean allBlocked = true;
@@ -249,14 +248,12 @@ public class SOS implements CPU.TrapHandler
     	}
     	if(allBlocked)
     	{
-    		if(m_verbose)
-    		{
-    			System.out.println("All proccesses blocked" + "This shouldn't happen! (yet)");
-    		}
+    		debugPrintln("All proccesses blocked! " + "This shouldn't happen! (yet)");
     		System.exit(-1);
     	}
     	m_currProcess.save(m_CPU);
     	m_currProcess = getRandomProcess();
+    	debugPrintln("Loaded process: " + m_currProcess.getProcessId());
     	m_currProcess.restore(m_CPU);
     }//scheduleNewProcess
 
@@ -302,7 +299,7 @@ public class SOS implements CPU.TrapHandler
         
         if (m_nextLoadPos > m_RAM.getSize())
         {
-        	System.out.println("ERROR: Not enough avaliable RAM: " + m_nextLoadPos + " out of " + m_RAM.getSize());
+        	debugPrintln("ERROR: Not enough avaliable RAM: " + m_nextLoadPos + " out of " + m_RAM.getSize());
         	this.syscallExit();
         }
         
@@ -460,10 +457,8 @@ public class SOS implements CPU.TrapHandler
      */
     private void syscallExit()
     {
-        if(m_verbose)
-        {
-            System.out.println("Exit of process " + m_currProcess.getProcessId() + " handled!");
-        }
+
+        debugPrintln("Exit of process " + m_currProcess.getProcessId() + " handled!");
         m_processes.remove(m_currProcess);
         scheduleNewProcess();
         
@@ -493,10 +488,8 @@ public class SOS implements CPU.TrapHandler
     {
         int a = m_currProcess.getProcessId();
         m_CPU.pushToStack2(a);
-        if(m_verbose)
-        {
-            System.out.println("PID = " + a);
-        }
+
+        debugPrintln("PID = " + a);
 
     }
     /**
@@ -559,6 +552,7 @@ public class SOS implements CPU.TrapHandler
 			  d.addProcess(this.m_currProcess);
 			  m_currProcess.block(m_CPU, d.getDevice(), SYSCALL_OPEN,-1);
 			  m_CPU.pushToStack2(CODE_SUCCESS);
+			  scheduleNewProcess();
 			  //m_CPU.pushToStack2(CODE_NOT_SHARABLE);
 			  return;
 		  }
@@ -581,7 +575,11 @@ public class SOS implements CPU.TrapHandler
 		   return;
 	   }
 	d.removeProcess(this.m_currProcess);
-	this.selectBlockedProcess(d.getDevice(), SYSCALL_CLOSE, -1);
+	ProcessControlBlock temp = selectBlockedProcess(d.getDevice(), SYSCALL_OPEN, -1);
+	if (temp != null)
+	{
+		temp.unblock();
+	}
 	m_CPU.pushToStack2(CODE_SUCCESS);
 
    }
@@ -1036,6 +1034,7 @@ public class SOS implements CPU.TrapHandler
         public void removeProcess(ProcessControlBlock pi)
         {
             procs.remove(pi);
+            
         }
 
         /** Does the given process currently have this device opened? */
