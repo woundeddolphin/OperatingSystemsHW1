@@ -13,14 +13,15 @@ import java.util.*;
  * @see Program
  */
 public class Sim
-{
-	public static final int TORUN = 3;
+{	
+	public static final int RUNSIMPLE = 0;		//used to access runSimple()
+	public static final int RUNMULTIPLE1 = 1;	//used to access runMultiple1()
+	public static final int RUNMULTIPLE2 = 2;	//used to access runMultiple2()
+	public static final int RUNMULTIPLE3 = 3;	//used to access runMultiple3()
 	
 	
-	public static final int RUNSIMPLE = 0;
-	public static final int RUNMULTIPLE1 = 1;
-	public static final int RUNMULTIPLE2 = 2;
-	public static final int RUNMULTIPLE3 = 3;
+	public static final int TORUN = RUNMULTIPLE3; //change this to test other files
+
 
     /*======================================================================-
      * Inner Classes
