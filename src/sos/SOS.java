@@ -310,7 +310,7 @@ public class SOS implements CPU.TrapHandler
         if (m_nextLoadPos > m_RAM.getSize())
         {
         	debugPrintln("ERROR: Not enough avaliable RAM: " + m_nextLoadPos + " out of " + m_RAM.getSize());
-        	this.syscallExit();
+        	System.exit(-1);
         }
         
         for(int i = 0; i < programArray.length; i++){ //move the program into ram
@@ -325,7 +325,7 @@ public class SOS implements CPU.TrapHandler
         m_processes.add(m_currProcess);
         m_nextProcessID++;
         
-        debugPrintln("Installed program of size " + allocSize + " with process id" + m_currProcess.getProcessId() 
+        debugPrintln("Installed program of size " + allocSize + " with process id " + m_currProcess.getProcessId() 
         		+ " at position " + (m_nextLoadPos - allocSize) );
         intializeRegisters(location, allocSize); // initialize registers
         

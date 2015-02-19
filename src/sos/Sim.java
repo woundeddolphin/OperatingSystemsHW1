@@ -296,7 +296,6 @@ public class Sim
         	default:
         		break;
         	}
-            runSimple();
 
             //Record the ending time
             endTime = System.currentTimeMillis();
