@@ -55,7 +55,7 @@ public class SOS implements CPU.TrapHandler
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
      **/
-    public static final boolean m_verbose = false;
+    public static final boolean m_verbose = true;
     
     /**
      * The CPU the operating system is managing.
@@ -365,7 +365,6 @@ public class SOS implements CPU.TrapHandler
      */
     @Override
     public void interruptIllegalMemoryAccess(int addr) {
-        // TODO Auto-generated method stub
         System.out.println("Illegal Memory Access Exception!");
         System.exit(0);
     }//interuptIllegalMemoryAccess
@@ -380,7 +379,6 @@ public class SOS implements CPU.TrapHandler
      */
     @Override
     public void interruptDivideByZero() {
-        // TODO Auto-generated method stub
         System.out.println("Illegal Divide by Zero Exception!");
         System.exit(0);
     }
@@ -395,7 +393,6 @@ public class SOS implements CPU.TrapHandler
      */
     @Override
     public void interruptIllegalInstruction(int[] instr) {
-        // TODO Auto-generated method stub
         System.out.println("Illegal Instruction Exception!");
         System.exit(0);
         
@@ -476,7 +473,7 @@ public class SOS implements CPU.TrapHandler
     private void syscallExit()
     {
 
-        debugPrintln("Removing process with id " + m_currProcess.getProcessId());
+        debugPrintln("Removing process with id " + m_currProcess.getProcessId() + " at " + m_CPU.getBASE());
         m_processes.remove(m_currProcess);
         scheduleNewProcess();
         
