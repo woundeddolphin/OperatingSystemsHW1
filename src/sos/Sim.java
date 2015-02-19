@@ -13,16 +13,7 @@ import java.util.*;
  * @see Program
  */
 public class Sim
-{	
-	public static final int RUNSIMPLE = 0;		//used to access runSimple()
-	public static final int RUNMULTIPLE1 = 1;	//used to access runMultiple1()
-	public static final int RUNMULTIPLE2 = 2;	//used to access runMultiple2()
-	public static final int RUNMULTIPLE3 = 3;	//used to access runMultiple3()
-	
-	
-	public static final int TORUN = RUNMULTIPLE3; //change this to test other files
-
-
+{
     /*======================================================================-
      * Inner Classes
      *----------------------------------------------------------------------
@@ -280,22 +271,7 @@ public class Sim
         try
         {
             //Run the simulation
-        	switch (TORUN) {
-        	case RUNSIMPLE:
-        		runSimple();
-        		break;
-        	case RUNMULTIPLE1:
-        		runMultiple1();
-        		break;
-        	case RUNMULTIPLE2:
-        		runMultiple2();
-        		break;
-        	case RUNMULTIPLE3:
-        		runMultiple3();
-        		break;
-        	default:
-        		break;
-        	}
+            runSimple();
 
             //Record the ending time
             endTime = System.currentTimeMillis();
