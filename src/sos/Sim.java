@@ -49,12 +49,11 @@ public class Sim
                 throw new SecurityException();
             }
         }
-
+        
         public void checkRead(String file) 
         {
         	//do nothing
         }
-        
     }//ExitCatcher
 
     /**
@@ -84,6 +83,8 @@ public class Sim
      * Member Variables
      *----------------------------------------------------------------------
      */
+    private static ExitCatcher m_EC = new ExitCatcher();
+    private static DoNothingHandler m_DNH = new DoNothingHandler();
     
     /*======================================================================-
      * Methods
@@ -101,8 +102,10 @@ public class Sim
     {
         //Create the simulated hardware and OS
         RAM ram = new RAM(1000, 10);
-        ConsoleDevice cd = new ConsoleDevice();
-        CPU cpu = new CPU(ram);
+        InterruptController ic = new InterruptController();
+        ConsoleDevice cd = new ConsoleDevice(ic);
+        cd.setId(1);
+        CPU cpu = new CPU(ram, ic);
         SOS os  = new SOS(cpu, ram);
 
         //Register the device drivers with the OS
@@ -117,8 +120,30 @@ public class Sim
         }
         os.createProcess(prog,  200);
 
+        //Start up the devices
+        Thread t = new Thread(cd);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+        
         //Run the simulation
-        cpu.run();
+        t = new Thread(cpu);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+
+        //Wait until System.exit() is called
+        while(!m_EC.isExitCaught())
+        {
+            try
+            {
+                t.join(1000);
+            }
+            catch(InterruptedException ie)
+            {
+                System.out.println("Interrupted!");
+                return;
+            }
+        }//while
+
         
     }//runSimple
 
@@ -135,8 +160,10 @@ public class Sim
     {
         //Create the simulated hardware and OS
         RAM ram = new RAM(5000, 10);
-        ConsoleDevice cd = new ConsoleDevice();
-        CPU cpu = new CPU(ram);
+        InterruptController ic = new InterruptController();
+        ConsoleDevice cd = new ConsoleDevice(ic);
+        cd.setId(1);
+        CPU cpu = new CPU(ram, ic);
         SOS os  = new SOS(cpu, ram);
 
         //Register the device drivers with the OS
@@ -160,9 +187,30 @@ public class Sim
         }
         os.addProgram(prog2);
 
-        //Run the simulation
-        cpu.run();
+        //Start up the devices
+        Thread t = new Thread(cd);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
         
+        //Run the simulation
+        t = new Thread(cpu);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+
+        //Wait until System.exit() is called
+        while(!m_EC.isExitCaught())
+        {
+            try
+            {
+                t.join(1000);
+            }
+            catch(InterruptedException ie)
+            {
+                System.out.println("Interrupted!");
+                return;
+            }
+        }//while
+
     }//runMultiple1
 
     /**
@@ -177,8 +225,10 @@ public class Sim
     {
         //Create the simulated hardware and OS
         RAM ram = new RAM(5000, 10);
-        ConsoleDevice cd = new ConsoleDevice();
-        CPU cpu = new CPU(ram);
+        InterruptController ic = new InterruptController();
+        ConsoleDevice cd = new ConsoleDevice(ic, 50000, 100000);
+        cd.setId(1);
+        CPU cpu = new CPU(ram, ic);
         SOS os  = new SOS(cpu, ram);
 
         //Register the device drivers with the OS
@@ -202,8 +252,29 @@ public class Sim
         }
         os.addProgram(prog2);
 
+        //Start up the devices
+        Thread t = new Thread(cd);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+        
         //Run the simulation
-        cpu.run();
+        t = new Thread(cpu);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+
+        //Wait until System.exit() is called
+        while(!m_EC.isExitCaught())
+        {
+            try
+            {
+                t.join(1000);
+            }
+            catch(InterruptedException ie)
+            {
+                System.out.println("Interrupted!");
+                return;
+            }
+        }//while
         
     }//runMultiple2
 
@@ -219,9 +290,12 @@ public class Sim
     {
         //Create the simulated hardware and OS
         RAM ram = new RAM(5000, 10);
-        KeyboardDevice kd = new KeyboardDevice();
-        ConsoleDevice cd = new ConsoleDevice();
-        CPU cpu = new CPU(ram);
+        InterruptController ic = new InterruptController();
+        KeyboardDevice kd = new KeyboardDevice(ic);
+        ConsoleDevice cd = new ConsoleDevice(ic);
+        kd.setId(0);
+        cd.setId(1);
+        CPU cpu = new CPU(ram, ic);
         SOS os  = new SOS(cpu, ram);
 
         //Register the device drivers with the OS
@@ -246,11 +320,34 @@ public class Sim
         }
         os.addProgram(prog2);
 
+        //Start up the devices
+        Thread t = new Thread(cd);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+        t = new Thread(kd);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+        
         //Run the simulation
-        cpu.run();
+        t = new Thread(cpu);
+        t.setUncaughtExceptionHandler(m_DNH);
+        t.start();
+
+        //Wait until System.exit() is called
+        while(!m_EC.isExitCaught())
+        {
+            try
+            {
+                t.join(1000);
+            }
+            catch(InterruptedException ie)
+            {
+                System.out.println("Interrupted!");
+                return;
+            }
+        }//while
         
     }//runMultiple3
-
 
     /**
      * main
@@ -261,8 +358,7 @@ public class Sim
     public static void main(String[] args)
     {
         //Start catching System.exit
-        ExitCatcher ec = new ExitCatcher();
-        System.setSecurityManager(ec);
+        System.setSecurityManager(m_EC);
 
         //Delay for any threads that might be winding down
         //Do a timed run
@@ -270,7 +366,7 @@ public class Sim
         long endTime = System.currentTimeMillis();
         try
         {
-            //Run the simulation
+            //***********Run the simulation************
             runSimple();
 
             //Record the ending time
@@ -282,6 +378,7 @@ public class Sim
         catch(SecurityException se)
         {
             endTime = System.currentTimeMillis();
+            se.printStackTrace();
         }
         catch(Exception e)
         {
@@ -289,12 +386,10 @@ public class Sim
             System.out.println("EXCEPTION THROWN DURING SIMULATION:");
             e.printStackTrace();
         }
-        
-
 
         //If System.exit was not called by any thread then bypass that
         //protection now
-        if (! ec.isExitCaught())
+        if (! m_EC.isExitCaught())
         {
             try{ System.exit(-42); } catch (SecurityException se) { }
         }
