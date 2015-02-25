@@ -444,7 +444,18 @@ public class SOS implements CPU.TrapHandler
         
     }//interruptIllegalInstruction
     
-
+    /**
+     * interruptIOReadComplete
+     * 
+     * adds ability to wake up threads that were waiting for a read 
+     * operation complete.
+     * 
+     * @param devID the ID of the device that completed its operation
+     * @param addr of blocked process
+     * @param data the data that were read from the device
+     * 
+     * @return void
+     */
 	@Override
 	public void interruptIOReadComplete(int devID, int addr, int data) {
 		
@@ -472,6 +483,17 @@ public class SOS implements CPU.TrapHandler
 		}
 	}//interruptIOReadComplete
 
+    /**
+     * interruptIOReadComplete
+     * 
+     * adds ability to wake up threads that were waiting for a read 
+     * operation complete.
+     * 
+     * @param devID the ID of the device that completed its operation
+     * @param addr of the blocked process
+     * 
+     * @return void
+     */
 	@Override
 	public void interruptIOWriteComplete(int devID, int addr) {
 		DeviceInfo temp = null;
@@ -728,11 +750,11 @@ public class SOS implements CPU.TrapHandler
    }//close
    
    /**
-    * syscallOpen
+    * syscallWrite
     * writes to a device specified by the stack at the location and 
     * with the value specified by the stack and handles 
     * some mistakes by pushing error codes
-    * if it succeeds it pushes success to the stack
+    * it then blocks the process to wait for a result
     * 
     * @param void
     * 
@@ -781,7 +803,7 @@ public class SOS implements CPU.TrapHandler
     * reads from a device at a location
     * specified by the stack and handles 
     * some mistakes by pushing error codes
-    * if it succeeds it pushes success to the stack
+    * it then blocks the process to wait for IO
     * 
     * @param void
     * 
