@@ -420,7 +420,7 @@ public class CPU implements Runnable {
                 break;
 
             case PUSH:
-                pushToStack(instruction[1]);
+                pushToStackR(instruction[1]);
                 break;
 
             case LOAD:
@@ -494,12 +494,12 @@ public class CPU implements Runnable {
      *            contains information to push to stack Helper method to push
      *            stuff onto the stack
      */
-    private void pushToStack(int register) {
+    private void pushToStackR(int register) {
         m_RAM.write(getLIM() - getSP(), m_registers[register]);
         setSP((getSP() + 1));
     }
     
-    public void pushToStack2(int content)
+    public void pushToStack(int content)
     {
         m_RAM.write(getLIM() - getSP(), content);
         setSP((getSP() + 1));

@@ -277,7 +277,7 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void scheduleNewProcess()
     {
-    	
+    	this.printProcessTable();
     	if (m_processes.isEmpty())
     	{
 
@@ -295,9 +295,9 @@ public class SOS implements CPU.TrapHandler
     	}
     	if(allBlocked)
     	{
-    		debugPrintln("All proccesses blocked! " + "This shouldn't happen! (yet)");
-    		System.exit(-1);
-    	}
+    		debugPrintln("All proccesses blocked!");
+    		createIdleProcess();
+    	}	
     	
     	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
     	m_currProcess.save(m_CPU);
@@ -459,7 +459,7 @@ public class SOS implements CPU.TrapHandler
 		}
 		if (temp == null)
 		{
-			m_CPU.pushToStack2(CODE_NO_DEVICE);
+			m_CPU.pushToStack(CODE_NO_DEVICE);
 		}
 		else
 		{
@@ -485,7 +485,7 @@ public class SOS implements CPU.TrapHandler
 		}
 		if (temp == null)
 		{
-			m_CPU.pushToStack2(CODE_NO_DEVICE);
+			m_CPU.pushToStack(CODE_NO_DEVICE);
 		}
 		else
 		{
@@ -603,7 +603,7 @@ public class SOS implements CPU.TrapHandler
     private void syscallPid ()
     {
         int a = m_currProcess.getProcessId();
-        m_CPU.pushToStack2(a);
+        m_CPU.pushToStack(a);
 
         debugPrintln("PID = " + a);
     }//syscallPid
@@ -669,7 +669,7 @@ public class SOS implements CPU.TrapHandler
 	  DeviceInfo d = syscallHelper();
 	  if (d == null)
 	  {
-		  m_CPU.pushToStack2(CODE_NO_DEVICE);
+		  m_CPU.pushToStack(CODE_NO_DEVICE);
 		  return;
 	  }
 	  boolean share = d.getDevice().isSharable();
@@ -678,20 +678,20 @@ public class SOS implements CPU.TrapHandler
 	  {
 		  if(d.containsProcess(m_currProcess))
 		  {
-			  m_CPU.pushToStack2(CODE_ALREADY_OPEN);
+			  m_CPU.pushToStack(CODE_ALREADY_OPEN);
 			  return;
 		  }
 		  else
 		  {
 			  d.addProcess(this.m_currProcess);
 			  m_currProcess.block(m_CPU, d.getDevice(), SYSCALL_OPEN,-1);
-			  m_CPU.pushToStack2(CODE_SUCCESS);
+			  m_CPU.pushToStack(CODE_SUCCESS);
 			  scheduleNewProcess();
 			  return;
 		  }
 	  }
 	  d.addProcess(this.m_currProcess);
-	  m_CPU.pushToStack2(CODE_SUCCESS);
+	  m_CPU.pushToStack(CODE_SUCCESS);
    }//syscallOpen
    
    /**
@@ -709,12 +709,12 @@ public class SOS implements CPU.TrapHandler
 	   DeviceInfo d = syscallHelper();
 	   if (d == null)
 	   {
-		   m_CPU.pushToStack2(CODE_NO_DEVICE);
+		   m_CPU.pushToStack(CODE_NO_DEVICE);
 		  return;
 	   }
 	   if(!d.containsProcess(m_currProcess))
 	   {
-		   m_CPU.pushToStack2(CODE_NOT_OPENED);
+		   m_CPU.pushToStack(CODE_NOT_OPENED);
 		   return;
 	   }
 	d.removeProcess(this.m_currProcess);
@@ -723,7 +723,7 @@ public class SOS implements CPU.TrapHandler
 	{
 		temp.unblock();
 	}
-	m_CPU.pushToStack2(CODE_SUCCESS);
+	m_CPU.pushToStack(CODE_SUCCESS);
 
    }//close
    
@@ -745,21 +745,35 @@ public class SOS implements CPU.TrapHandler
 	   DeviceInfo d = syscallHelper();
 	   if (d == null)
 	   {
-		   m_CPU.pushToStack2(CODE_NO_DEVICE);
+		   m_CPU.pushToStack(CODE_NO_DEVICE);
 		  return;
 	   }
 	   if(!d.containsProcess(m_currProcess))
 	   {
-		   m_CPU.pushToStack2(CODE_NOT_OPENED);
+		   m_CPU.pushToStack(CODE_NOT_OPENED);
 		   return;
 	   }
 	   if(!d.getDevice().isWriteable())
 	   {
-		   m_CPU.pushToStack2(CODE_NOT_WRITEABLE);
+		   m_CPU.pushToStack(CODE_NOT_WRITEABLE);
 		   return;
 	   }
-	   d.getDevice().write(address, value);
-	   m_CPU.pushToStack2(CODE_SUCCESS);
+	   if(d.getDevice().isAvailable())
+	   {
+		   d.getDevice().write(address,value);
+		   m_currProcess.block(m_CPU, d.device, SYSCALL_READ, address);
+	   }
+	   else //not available
+	   {
+		   m_CPU.setPC(m_CPU.getPC() - CPU.INSTRSIZE);   
+		   m_CPU.pushToStack(d.getId());
+		   m_CPU.pushToStack(address);
+		   m_CPU.pushToStack(value);
+		   m_CPU.pushToStack(SYSCALL_WRITE);
+	   }
+	   scheduleNewProcess();
+
+
    }
    
    /**
@@ -779,21 +793,34 @@ public class SOS implements CPU.TrapHandler
 	   DeviceInfo d = syscallHelper();
 	   if (d == null)
 	   {
-		   m_CPU.pushToStack2(CODE_NO_DEVICE);
+		   m_CPU.pushToStack(CODE_NO_DEVICE);
 		  return;
 	   }
 	   if(!d.containsProcess(m_currProcess))
 	   {
-		   m_CPU.pushToStack2(CODE_NOT_OPENED);
+		   m_CPU.pushToStack(CODE_NOT_OPENED);
 		   return;
 	   }
 	   if(!d.getDevice().isReadable())
 	   {
-		   m_CPU.pushToStack2(CODE_NOT_READABLE);
+		   m_CPU.pushToStack(CODE_NOT_READABLE);
 		   return;
 	   }
-	   m_CPU.pushToStack2(d.getDevice().read(address));
-	   m_CPU.pushToStack2(CODE_SUCCESS);
+	   if(d.getDevice().isAvailable())
+	   {
+		   d.getDevice().read(address);
+		   m_currProcess.block(m_CPU, d.device, SYSCALL_READ, address);
+	   }
+	   else //not available
+	   {
+		   m_CPU.setPC(m_CPU.getPC() - CPU.INSTRSIZE);
+		   
+		   m_CPU.pushToStack(d.getId());
+		   m_CPU.pushToStack(address);
+		   m_CPU.pushToStack(SYSCALL_READ);
+	   }
+	   scheduleNewProcess();
+
    }
    
    
