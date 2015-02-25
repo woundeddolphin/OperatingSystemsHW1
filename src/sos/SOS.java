@@ -426,6 +426,7 @@ public class SOS implements CPU.TrapHandler
         System.out.println("Illegal Divide by Zero Exception!");
         System.exit(0);
     }
+    
 
     /**
      * interuptIllegalInstruction
@@ -440,7 +441,61 @@ public class SOS implements CPU.TrapHandler
         System.out.println("Illegal Instruction Exception!");
         System.exit(0);
         
+        
     }//interruptIllegalInstruction
+    
+
+	@Override
+	public void interruptIOReadComplete(int devID, int addr, int data) {
+		
+		DeviceInfo temp = null;
+		for (DeviceInfo i : m_devices)
+		{
+			if (i.getId() == devID)
+			{
+				temp = i;
+				break;
+			}
+		}
+		if (temp == null)
+		{
+			m_CPU.pushToStack2(CODE_NO_DEVICE);
+		}
+		else
+		{
+			ProcessControlBlock block = selectBlockedProcess(temp.device, SYSCALL_READ, addr);
+			block.unblock();
+			int location = block.getRegisterValue(CPU.LIM) - block.getRegisterValue(CPU.SP);
+			m_RAM.write(location, data);
+			m_RAM.write(location-1, CODE_SUCCESS);
+	        block.setRegisterValue(CPU.SP, CPU.SP+2);
+		}
+	}//interruptIOReadComplete
+
+	@Override
+	public void interruptIOWriteComplete(int devID, int addr) {
+		DeviceInfo temp = null;
+		for (DeviceInfo i : m_devices)
+		{
+			if (i.getId() == devID)
+			{
+				temp = i;
+				break;
+			}
+		}
+		if (temp == null)
+		{
+			m_CPU.pushToStack2(CODE_NO_DEVICE);
+		}
+		else
+		{
+			ProcessControlBlock block = selectBlockedProcess(temp.device, SYSCALL_READ, addr);
+			block.unblock();
+			int location = block.getRegisterValue(CPU.LIM) - block.getRegisterValue(CPU.SP);
+			m_RAM.write(location, CODE_SUCCESS);
+	        block.setRegisterValue(CPU.SP, CPU.SP+1);
+		}		
+	}//interruptIOWriteComplete
     
     /*======================================================================
      * System Calls
@@ -1232,6 +1287,7 @@ public class SOS implements CPU.TrapHandler
         }
         
     }//class DeviceInfo
+
         
     
 };//class SOS
