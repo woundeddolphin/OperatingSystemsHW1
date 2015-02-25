@@ -20,7 +20,7 @@ import java.util.*;
  * @author Matt Wellnitz
  */
 
-public class CPU {
+public class CPU implements Runnable {
 
     // ======================================================================
     // Constants
@@ -85,6 +85,11 @@ public class CPU {
      * simply be an address that the PC register is set to.
      */
     private TrapHandler m_TH = null;
+    
+    /**
+     * a reference to the CPUs interrupt controller. 
+     */
+    private InterruptController m_IC = null;
 
     // ======================================================================
     // Methods
@@ -95,12 +100,14 @@ public class CPU {
      * 
      * Intializes all member variables.
      */
-    public CPU(RAM ram) {
+    public CPU(RAM ram, InterruptController IC) {
         m_registers = new int[NUMREG];
         for (int i = 0; i < NUMREG; i++) {
             m_registers[i] = 0;
         }
         m_RAM = ram;
+        m_IC = IC;
+        
     }// CPU ctor
 
     /**
@@ -330,6 +337,9 @@ public class CPU {
      */
     public void run() {
         while (true) {
+        	// check for interrupt
+            checkForIOInterrupt();
+            
             // get next instruction from RAM
             int[] instruction = m_RAM.fetch(getPC());
 
@@ -338,7 +348,6 @@ public class CPU {
                 regDump();
                 printInstr(instruction);
             }
-
             // format of instruction: opcode, arg1, arg2, arg3
             switch (instruction[0]) {
             case SET:
