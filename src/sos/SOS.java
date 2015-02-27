@@ -57,7 +57,7 @@ public class SOS implements CPU.TrapHandler
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
      **/
-    public static final boolean m_verbose = true;
+    public static final boolean m_verbose = false;
     
     /**
      * The CPU the operating system is managing.
@@ -295,7 +295,6 @@ public class SOS implements CPU.TrapHandler
     	}
     	if(allBlocked)
     	{
-    		debugPrintln("All proccesses blocked!");
     		createIdleProcess();
     	}	
     	
@@ -369,8 +368,6 @@ public class SOS implements CPU.TrapHandler
         m_processes.add(m_currProcess);
         m_nextProcessID++;
         
-        debugPrintln("Installed program of size " + allocSize + " with process id " + m_currProcess.getProcessId() 
-        		+ " at position " + (m_nextLoadPos - allocSize) );
         intializeRegisters(location, allocSize); // initialize registers
         
     }//createProcess
