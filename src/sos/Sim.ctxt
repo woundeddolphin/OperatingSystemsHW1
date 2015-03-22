@@ -1,8 +1,0 @@
-#BlueJ class context
-comment0.params=
-comment0.target=Sim()
-comment0.text=\ \ \n\ the\ constructor\ does\ nothing\n\n
-comment1.params=args
-comment1.target=void\ main(java.lang.String[])
-comment1.text=\n\ main\n\n\ This\ function\ makes\ the\ simulation\ go.\n\n
-numComments=2
