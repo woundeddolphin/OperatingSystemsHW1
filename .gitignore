@@ -216,3 +216,9 @@ pip-log.txt
 .mr.developer.cfg
 
 *.class
+
+**/doc
+*.class
+*.pkh
+*.ctxt
+*.bluej
