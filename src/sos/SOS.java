@@ -268,6 +268,27 @@ public class SOS implements CPU.TrapHandler
         return null;        // no processes are Ready
     }//getRandomProcess
     
+    ProcessControlBlock getFairProcess()
+    {
+    	//TODO
+    	int maxIndex = -1; 
+    	double avgStarve = Integer.MAX_VALUE;    	
+    	for(int i = 0; i < m_processes.size(); i++)
+    	{
+    		if(avgStarve > m_processes.get(i).avgStarve && !m_processes.get(i).isBlocked())
+    		{
+    			avgStarve = m_processes.get(i).avgStarve;
+    			maxIndex = i;
+    		}
+    	}
+    	if (maxIndex == Integer.MAX_VALUE)
+    	{
+    		return null;
+    	}
+		return m_processes.get(maxIndex);
+    	
+    }
+    
 	/**
 	 * scheduleNewProcess
 	 * 
@@ -295,16 +316,30 @@ public class SOS implements CPU.TrapHandler
     	{
     		createIdleProcess();
     	}	
-    	
-    	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
-    	m_currProcess.save(m_CPU);
-    	m_currProcess = getRandomProcess();
-    	
-    	if (m_currProcess.getProcessId() != sameCheck) // checks if new pid is same as old
+    	int i = 0;
+    	ProcessControlBlock temp;
+    	switch (i)
     	{
-    		debugPrintln("Switched to process " + m_currProcess.getProcessId());
+    	case 0: 
+    		temp = getRandomProcess();
+    	case 1: 
+    		temp = getFairProcess();
+		default:
+	    	temp = getRandomProcess();
+
     	}
-    	m_currProcess.restore(m_CPU);
+    	if(!temp.equals(m_currProcess))
+    	{
+	    	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
+	    	m_currProcess.save(m_CPU);
+	    	m_currProcess = temp;
+	    	
+	    	if (m_currProcess.getProcessId() != sameCheck) // checks if new pid is same as old
+	    	{
+	    		debugPrintln("Switched to process " + m_currProcess.getProcessId());
+	    	}
+	    	m_currProcess.restore(m_CPU);
+    	}
     }//scheduleNewProcess
 
     /**
