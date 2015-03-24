@@ -316,16 +316,19 @@ public class SOS implements CPU.TrapHandler
     	{
     		createIdleProcess();
     	}	
-    	int i = 0;
+    	int i = 1;
     	ProcessControlBlock temp;
     	switch (i)
     	{
     	case 0: 
     		temp = getRandomProcess();
+    		break;
     	case 1: 
     		temp = getFairProcess();
+    		break;
 		default:
 	    	temp = getRandomProcess();
+	    	break;
 
     	}
     	if(!temp.equals(m_currProcess))
