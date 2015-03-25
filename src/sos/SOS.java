@@ -58,7 +58,7 @@ public class SOS implements CPU.TrapHandler
      * This flag causes the SOS to print lots of potentially helpful
      * status messages
      **/
-    public static final boolean m_verbose = false;
+    public static final boolean m_verbose = true;
     
     /**
      * The CPU the operating system is managing.
@@ -237,9 +237,8 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void removeCurrentProcess()
     {
-    	//debugPrintln("removed process: " + m_currProcess.getProcessId());
+    	printProcessTable();
     	m_processes.remove(m_currProcess);
-    	scheduleNewProcess();
     }//removeCurrentProcess
 
     /**
@@ -304,15 +303,12 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void scheduleNewProcess()
     {
-    	this.printProcessTable();
     	if (m_processes.isEmpty())
     	{
 
     		//debugPrintln("No more processes to run. Stopping.");
     		System.exit(CODE_SUCCESS);
     	}
-
-
     	int i = 1;
     	ProcessControlBlock temp;
     	switch (i)
@@ -334,7 +330,6 @@ public class SOS implements CPU.TrapHandler
     	}	
     	if(!temp.equals(m_currProcess))
     	{
-	    	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
 	    	m_currProcess.save(m_CPU);
 	    	m_currProcess = temp;
 	    	m_currProcess.restore(m_CPU);
@@ -633,8 +628,8 @@ public class SOS implements CPU.TrapHandler
      */
     private void syscallExit()
     {
-        m_processes.remove(m_currProcess);
-        scheduleNewProcess();
+    	removeCurrentProcess();
+    	scheduleNewProcess();
         
     }//syscallExit
     
@@ -1454,9 +1449,7 @@ public class SOS implements CPU.TrapHandler
         /** Register a process as having closed this device */
         public void removeProcess(ProcessControlBlock pi)
         {
-        	printProcessTable();
             procs.remove(pi);
-            
         }
 
         /** Does the given process currently have this device opened? */
