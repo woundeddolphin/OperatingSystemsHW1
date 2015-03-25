@@ -16,6 +16,7 @@ import java.util.*;
  * @author Zak Pearson
  * @author Matt Wellnitz
  * @author Jeremy Cimfl
+ * @author Bryce Matsuda
  * 
  */
    
@@ -310,19 +311,8 @@ public class SOS implements CPU.TrapHandler
     		//debugPrintln("No more processes to run. Stopping.");
     		System.exit(CODE_SUCCESS);
     	}
-    	boolean allBlocked = true;
-    	for(ProcessControlBlock i: m_processes)
-    	{
-    		if (!i.isBlocked())
-    		{
-    			allBlocked = false;
-    			break;
-    		}
-    	}
-    	if(allBlocked)
-    	{
-    		createIdleProcess();
-    	}	
+
+
     	int i = 1;
     	ProcessControlBlock temp;
     	switch (i)
@@ -336,18 +326,17 @@ public class SOS implements CPU.TrapHandler
 		default:
 	    	temp = getRandomProcess();
 	    	break;
-
     	}
+    	if(temp == null)
+    	{
+    		createIdleProcess();
+    		return;
+    	}	
     	if(!temp.equals(m_currProcess))
     	{
 	    	int sameCheck = m_currProcess.getProcessId(); // used to check if new pid is same as old
 	    	m_currProcess.save(m_CPU);
 	    	m_currProcess = temp;
-	    	
-	    	if (m_currProcess.getProcessId() != sameCheck) // checks if new pid is same as old
-	    	{
-	    		//debugPrintln("Switched to process " + m_currProcess.getProcessId());
-	    	}
 	    	m_currProcess.restore(m_CPU);
     	}
     }//scheduleNewProcess
