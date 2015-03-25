@@ -18,6 +18,7 @@ import java.util.*;
  * @author Matthew Farr
  * @author Zach Pearson
  * @author Matt Wellnitz
+ * @author Bryce Matsuda
  */
 
 public class CPU implements Runnable {
