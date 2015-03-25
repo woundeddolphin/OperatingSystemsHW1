@@ -236,7 +236,7 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void removeCurrentProcess()
     {
-    	debugPrintln("removed process: " + m_currProcess.getProcessId());
+    	//debugPrintln("removed process: " + m_currProcess.getProcessId());
     	m_processes.remove(m_currProcess);
     	scheduleNewProcess();
     }//removeCurrentProcess
@@ -271,21 +271,21 @@ public class SOS implements CPU.TrapHandler
     ProcessControlBlock getFairProcess()
     {
     	//TODO
-    	int maxIndex = -1; 
+    	int index = -1; 
     	double avgStarve = Integer.MAX_VALUE;    	
     	for(int i = 0; i < m_processes.size(); i++)
     	{
     		if(avgStarve > m_processes.get(i).avgStarve && !m_processes.get(i).isBlocked())
     		{
     			avgStarve = m_processes.get(i).avgStarve;
-    			maxIndex = i;
+    			index = i;
     		}
     	}
-    	if (maxIndex == Integer.MAX_VALUE)
+    	if (avgStarve == Integer.MAX_VALUE)
     	{
     		return null;
     	}
-		return m_processes.get(maxIndex);
+		return m_processes.get(index);
     	
     }
     
@@ -300,7 +300,7 @@ public class SOS implements CPU.TrapHandler
     	if (m_processes.isEmpty())
     	{
 
-    		debugPrintln("No more processes to run. Stopping.");
+    		//debugPrintln("No more processes to run. Stopping.");
     		System.exit(CODE_SUCCESS);
     	}
     	boolean allBlocked = true;
@@ -339,7 +339,7 @@ public class SOS implements CPU.TrapHandler
 	    	
 	    	if (m_currProcess.getProcessId() != sameCheck) // checks if new pid is same as old
 	    	{
-	    		debugPrintln("Switched to process " + m_currProcess.getProcessId());
+	    		//debugPrintln("Switched to process " + m_currProcess.getProcessId());
 	    	}
 	    	m_currProcess.restore(m_CPU);
     	}
@@ -637,8 +637,6 @@ public class SOS implements CPU.TrapHandler
      */
     private void syscallExit()
     {
-
-        debugPrintln("Removing process with id " + m_currProcess.getProcessId() + " at " + m_CPU.getBASE());
         m_processes.remove(m_currProcess);
         scheduleNewProcess();
         
@@ -671,7 +669,7 @@ public class SOS implements CPU.TrapHandler
         int a = m_currProcess.getProcessId();
         m_CPU.pushToStack(a);
 
-        debugPrintln("PID = " + a);
+        //debugPrintln("PID = " + a);
     }//syscallPid
     
     /**
@@ -1460,6 +1458,7 @@ public class SOS implements CPU.TrapHandler
         /** Register a process as having closed this device */
         public void removeProcess(ProcessControlBlock pi)
         {
+        	printProcessTable();
             procs.remove(pi);
             
         }
