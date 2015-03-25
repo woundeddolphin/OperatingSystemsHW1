@@ -268,9 +268,16 @@ public class SOS implements CPU.TrapHandler
         return null;        // no processes are Ready
     }//getRandomProcess
     
+    /**
+     * getFairProcess
+     *
+     * selects a non-Blocked process with the smallest average starve time.
+     *
+     * @return a reference to the ProcessControlBlock struct of the selected process
+     * -OR- null if no non-blocked process exists
+     */
     ProcessControlBlock getFairProcess()
     {
-    	//TODO
     	int index = -1; 
     	double avgStarve = Integer.MAX_VALUE;    	
     	for(int i = 0; i < m_processes.size(); i++)
@@ -285,8 +292,8 @@ public class SOS implements CPU.TrapHandler
     	{
     		return null;
     	}
-		return m_processes.get(index);
     	
+		return m_processes.get(index);
     }
     
 	/**
