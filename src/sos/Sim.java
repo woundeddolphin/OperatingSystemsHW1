@@ -85,32 +85,30 @@ public class Sim
      */
     private static ExitCatcher m_EC = new ExitCatcher();
     private static DoNothingHandler m_DNH = new DoNothingHandler();
-    private static CPU m_CPU = null; //init'd by various tests
     
     /*======================================================================-
      * Methods
      *----------------------------------------------------------------------
      */
     
+
     /**
-     * runSchedulerTest
+     * runAllocTest
      *
-     * runs one process that twenty others.  Each spawned process will
-     * display I/O bound behavior followed by CPU bound behavior (or
-     * vice versa).
+     * runs lots of programs of different sizes to create memory fragmentation
      *
      */
-    public static void runSchedulerTest()
+    public static void runAllocTest()
     {
         //Create the simulated hardware and OS
-        RAM ram = new RAM(50000, 0);
+        RAM ram = new RAM(3000, 0);
         InterruptController ic = new InterruptController();
-        KeyboardDevice kd = new KeyboardDevice(ic, 4999, 5001);
-        ConsoleDevice cd = new ConsoleDevice(ic, 749, 751);
+        KeyboardDevice kd = new KeyboardDevice(ic);
         kd.setId(0);
+        ConsoleDevice cd = new ConsoleDevice(ic);
         cd.setId(1);
-        m_CPU = new CPU(ram, ic);
-        SOS os  = new SOS(m_CPU, ram);
+        CPU cpu = new CPU(ram, ic);
+        SOS os  = new SOS(cpu, ram);
 
         //Register the device drivers with the OS
         os.registerDevice(kd, 0);
@@ -118,30 +116,65 @@ public class Sim
 
         //Load the program into RAM
         Program prog = new Program();
-        if (prog.load("spawn20.asm", false) != 0)
+        if (prog.load("quickspawn20.asm", false) != 0)
         {
-            System.out.println("ERROR: Could not load spawn20.asm");
+            System.out.println("ERROR: Could not load quickspawn20.asm");
             return;
         }
-        os.createProcess(prog,  400);
+        os.createProcess(prog,  1200);
 
-        //Register programs that can be run via an Exec system call
-        Program prog2 = new Program();
-        if (prog2.load("multibound1.asm", false) != 0)
+        //Register other programs for Exec system calls.  These processes have
+        //been designed to encourage memory fragmentation
+        prog = new Program();
+        if (prog.load("quickspawn1a.asm", false) != 0)
         {
-            System.out.println("ERROR: Could not load multibound1.asm");
+            System.out.println("ERROR: Could not load quickspawn1a.asm");
             return;
         }
-        os.addProgram(prog2);
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("quickspawn1b.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load quickspawn1b.asm");
+            return;
+        }
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("quickspawn1c.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load quickspawn1c.asm");
+            return;
+        }
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("quickspawn1d.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load quickspawn1d.asm");
+            return;
+        }
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("quickspawn1e.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load quickspawn1e.asm");
+            return;
+        }
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("thinker.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load thinker.asm");
+            return;
+        }
+        os.addProgram(prog);
+        prog = new Program();
+        if (prog.load("bigthinker.asm", false) != 0)
+        {
+            System.out.println("ERROR: Could not load bigthinker.asm");
+            return;
+        }
+        os.addProgram(prog);
 
-        Program prog3 = new Program();
-        if (prog3.load("multibound2.asm", false) != 0)
-        {
-            System.out.println("ERROR: Could not load multibound2.asm");
-            return;
-        }
-        os.addProgram(prog3);
-        
         //Start up the devices
         Thread t = new Thread(cd);
         t.setUncaughtExceptionHandler(m_DNH);
@@ -151,7 +184,7 @@ public class Sim
         t.start();
         
         //Run the simulation
-        t = new Thread(m_CPU);
+        t = new Thread(cpu);
         t.setUncaughtExceptionHandler(m_DNH);
         t.start();
 
@@ -168,8 +201,8 @@ public class Sim
                 return;
             }
         }//while
-        
-    }//runSchedulerTest
+
+    }//runAllocTest
 
     /**
      * main
@@ -189,7 +222,7 @@ public class Sim
         try
         {
             //***********Run the simulation************
-            runSchedulerTest();
+            runAllocTest();
 
             //Record the ending time
             endTime = System.currentTimeMillis();
@@ -220,7 +253,6 @@ public class Sim
         System.out.println("");
         System.out.println("");
         System.out.println("END OF SIMULATION");
-        System.out.println("Total CPU ticks: " + m_CPU.getTicks());
         System.out.println("Total Simulation Time: " + (endTime - startTime) + "ms");
 
         System.exit(0);
