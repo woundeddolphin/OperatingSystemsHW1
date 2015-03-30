@@ -1414,13 +1414,55 @@ public class SOS implements CPU.TrapHandler
         {
             return this.registers[CPU.BASE] - pi.registers[CPU.BASE];
         }
+
         
-        //<insert method header here>
+        /**
+         * 
+         * @param newBase
+         * Takes a location in ram and moves this process to that location
+         * copying line by line and updates the register values for the
+         * new location of the program
+         *
+         * @return boolean success of moving code
+         */
         public boolean move(int newBase)
         {
-			return false;
-        	//TODO
-            //%%%You will implement this method
+            int oBase = registers[m_CPU.getBASE()];
+            int oLim = registers[m_CPU.getLIM()];
+            int progSize = oLim - oBase;
+        	if(newBase < 0 || newBase + progSize > m_RAM.getSize())
+        	{
+        		return false;
+        	}
+        	if(newBase > oBase)
+        	{
+        		for(int i = progSize; i >= 0; i--)
+        		{
+        			m_RAM.write(newBase+i, m_RAM.read(i+oBase));
+        		}
+        	}
+        	else
+        	{
+        		for(int i = 0; i <= progSize; i++)
+        		{
+        			m_RAM.write(newBase+i, m_RAM.read(i+oBase));
+        		}
+        	}
+        	registers[m_CPU.getBASE()] = newBase;
+            registers[m_CPU.getLIM()] = newBase + progSize;
+            registers[m_CPU.getPC()] += newBase - oBase;
+            registers[m_CPU.getSP()] += newBase - oBase;	
+            if(this.equals(m_currProcess))
+            {
+            	int[] regs = m_CPU.getRegisters();
+                for(int i = 0; i < CPU.NUMREG; i++)
+                {
+                    regs[i] = registers[i];
+                }
+            }
+        	
+        	debugPrintln("Process " + getProcessId() + " moved from " + oBase + " to " + newBase);
+        	return true;
         }//move
 
 
