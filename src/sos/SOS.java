@@ -393,7 +393,7 @@ public class SOS implements CPU.TrapHandler
         
         m_currProcess = new ProcessControlBlock(m_nextProcessID);
         m_processes.add(m_currProcess);
-        m_nextProcessID++;        
+        m_nextProcessID++;  
         intializeRegisters(location, allocSize); // initialize registers
         
     }//createProcess
@@ -1056,17 +1056,126 @@ public class SOS implements CPU.TrapHandler
     //<insert method header here>
     private int allocBlock(int size)
     {
-        //%%%You will implement this method
-    
-        return -1;
+    	int totalSpace = 0;
+    	MemBlock finalLoc = null;
+    	for(MemBlock i : m_freeList)
+    	{
+    		totalSpace += i.m_size;
+    		if(i.m_size >= size)
+    		{
+    			finalLoc = i;
+    			break;
+    		}
+    	}
+    	if(finalLoc == null)
+    	{
+    		if (totalSpace < size)
+    		{
+    			return -1;
+    		}
+    		m_currProcess.save(m_CPU);
+    		defragment();
+    		return(allocBlock(size));
+    	}
+    	m_freeList.remove(finalLoc);
+        System.out.println("Allocating space at " + finalLoc.m_addr + " of size " + size);
+
+    	m_freeList.add(new MemBlock(finalLoc.m_addr+size+1,finalLoc.m_size-size));
+    	return finalLoc.m_addr;
     }//allocBlock
+    
+    private void defragment()
+    {
+    	int nextLoc = 0;
+    	Vector<ProcessControlBlock> sortedProcesses = sort();
+    	for(ProcessControlBlock i : sortedProcesses)
+    	{
+    		i.move(nextLoc);
+    		nextLoc = i.getRegisterValue(CPU.LIM) + 1;
+    	}
+    	m_freeList.removeAllElements();
+    	m_freeList.addElement(new MemBlock(nextLoc,m_RAM.getSize()-nextLoc));
+    }
+    private Vector<ProcessControlBlock> sort()
+    {
+//    	Collections.sort(m_processes);
+//    	return m_processes;
+    	Vector<ProcessControlBlock> sorted = new Vector<ProcessControlBlock>();
+    	for(ProcessControlBlock i : m_processes)
+    	{
+    		sorted.add(i);
+    	}
+    	for(int i = 0; i < sorted.size(); i++)
+    	{
+    		ProcessControlBlock first = sorted.get(i);
+    		for(int j = i+1; j < sorted.size(); j++)
+    		{
+    			if(sorted.get(j).getRegisterValue(CPU.BASE) < first.getRegisterValue(CPU.BASE))
+    			{
+    				first = sorted.get(j);
+    			}
+    		}
+    		sorted.set(sorted.indexOf(first),sorted.get(i));
+    		sorted.set(i, first);
+    	}
+		return sorted;
+    	
+    }
+    
 
     //<insert method header here>
     private void freeCurrProcessMemBlock()
     {
-        //%%%You will implement this method
-    
+    	MemBlock above = null;
+    	MemBlock below = null;
+    	m_currProcess.save(m_CPU);
+    	System.out.println(m_currProcess.registers);
+    	int lim = m_currProcess.registers[CPU.LIM];    	
+    	int base = m_currProcess.registers[CPU.BASE];
+    	MemBlock temp = new MemBlock(base, lim-base);
+    	for(MemBlock i: m_freeList)
+    	{
+    		if(i.getAddr() == lim+1)
+    		{
+    			above = i;
+    		}
+    		else if (i.getAddr()+i.getSize() == base)
+    		{
+    			below = i;
+    		}
+    	}
+    	temp = merge(temp,above);
+    	temp = merge(temp,below);
+    	if(above != null)
+    	{
+    		m_freeList.remove(above);
+    	}
+    	if(below != null)
+    	{
+    		m_freeList.remove(below);
+    	}
+    	if(temp.getAddr()+temp.getSize() >= m_RAM.getSize())
+    	{
+    		temp = new MemBlock(temp.getAddr(),m_RAM.getSize()-1);
+    	}
+    	m_freeList.addElement(temp);
+    	
     }//freeCurrProcessMemBlock
+    
+    private MemBlock merge(MemBlock i, MemBlock j)
+    {
+    	if (j == null)
+    	{
+    		return i;
+    	}
+    	if(i.getAddr() > j.getAddr())
+    	{
+    		return new MemBlock(j.getAddr(),j.getSize()+i.getSize());   				
+    	}
+		return new MemBlock(i.getAddr(),j.getSize()+i.getSize());   				
+
+    }
+    
     
     /**
      * printMemAlloc                 *DEBUGGING*
@@ -1427,8 +1536,8 @@ public class SOS implements CPU.TrapHandler
          */
         public boolean move(int newBase)
         {
-            int oBase = registers[m_CPU.getBASE()];
-            int oLim = registers[m_CPU.getLIM()];
+            int oBase = registers[CPU.BASE];
+            int oLim = registers[CPU.LIM];
             int progSize = oLim - oBase;
         	if(newBase < 0 || newBase + progSize > m_RAM.getSize())
         	{
@@ -1448,11 +1557,11 @@ public class SOS implements CPU.TrapHandler
         			m_RAM.write(newBase+i, m_RAM.read(i+oBase));
         		}
         	}
-        	registers[m_CPU.getBASE()] = newBase;
-            registers[m_CPU.getLIM()] = newBase + progSize;
-            registers[m_CPU.getPC()] += newBase - oBase;
-            registers[m_CPU.getSP()] += newBase - oBase;	
-            if(this.equals(m_currProcess))
+        	registers[CPU.BASE] = newBase;
+            registers[CPU.LIM] = newBase + progSize;
+            registers[CPU.PC] += newBase - oBase;
+            registers[CPU.SP] += newBase - oBase;	
+            if(equals(m_currProcess))
             {
             	int[] regs = m_CPU.getRegisters();
                 for(int i = 0; i < CPU.NUMREG; i++)
@@ -1476,6 +1585,32 @@ public class SOS implements CPU.TrapHandler
         {
             this.processId = pid;
         }
+        
+        /**
+         * copy constructor
+         *
+         * @param pid        a process id for the process.  The caller is
+         *                   responsible for making sure it is unique.
+         */
+        public ProcessControlBlock(ProcessControlBlock temp)
+        {
+            this.processId = temp.processId;
+
+            this.registers = temp.registers;
+
+            this.blockedForDevice = temp.blockedForDevice;
+
+            this.blockedForOperation = temp.blockedForOperation;
+
+            this.lastReadyTime = temp.lastReadyTime;
+
+            this.numReady = temp.numReady;
+            
+            this.maxStarve = temp.maxStarve;
+
+            this.avgStarve = temp.avgStarve;
+        }
+        
 
         /**
          * @return the current process' id

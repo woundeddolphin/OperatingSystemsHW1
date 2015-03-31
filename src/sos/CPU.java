@@ -69,7 +69,7 @@ public class CPU implements Runnable {
 	/**
 	 * specifies whether the CPU should output details of its work
 	 **/
-	private boolean m_verbose = false;
+	private boolean m_verbose = true;
 
 	/**
 	 * This array contains all the registers on the "chip".
