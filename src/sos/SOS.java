@@ -239,7 +239,7 @@ public class SOS implements CPU.TrapHandler
 	 */
     public void removeCurrentProcess()
     {
-    	printProcessTable();
+    	//printProcessTable();
     	m_processes.remove(m_currProcess);
     	freeCurrProcessMemBlock();
     }//removeCurrentProcess
@@ -1136,27 +1136,27 @@ public class SOS implements CPU.TrapHandler
     }
     private Vector<ProcessControlBlock> sort()
     {
-//    	Collections.sort(m_processes);
-//    	return m_processes;
-    	Vector<ProcessControlBlock> sorted = new Vector<ProcessControlBlock>();
-    	for(ProcessControlBlock i : m_processes)
-    	{
-    		sorted.add(i);
-    	}
-    	for(int i = 0; i < sorted.size(); i++)
-    	{
-    		ProcessControlBlock first = sorted.get(i);
-    		for(int j = i+1; j < sorted.size(); j++)
-    		{
-    			if(sorted.get(j).getRegisterValue(CPU.BASE) < first.getRegisterValue(CPU.BASE))
-    			{
-    				first = sorted.get(j);
-    			}
-    		}
-    		sorted.set(sorted.indexOf(first),sorted.get(i));
-    		sorted.set(i, first);
-    	}
-		return sorted;
+    	Collections.sort(m_processes);
+    	return m_processes;
+//    	Vector<ProcessControlBlock> sorted = new Vector<ProcessControlBlock>();
+//    	for(ProcessControlBlock i : m_processes)
+//    	{
+//    		sorted.add(i);
+//    	}
+//    	for(int i = 0; i < sorted.size(); i++)
+//    	{
+//    		ProcessControlBlock first = sorted.get(i);
+//    		for(int j = i+1; j < sorted.size(); j++)
+//    		{
+//    			if(sorted.get(j).getRegisterValue(CPU.BASE) < first.getRegisterValue(CPU.BASE))
+//    			{
+//    				first = sorted.get(j);
+//    			}
+//    		}
+//    		sorted.set(sorted.indexOf(first),sorted.get(i));
+//    		sorted.set(i, first);
+//    	}
+//		return sorted;
     	
     }
     
@@ -1527,9 +1527,13 @@ public class SOS implements CPU.TrapHandler
          */
         public boolean move(int newBase)
         {
+        	if(this == m_currProcess)
+        	{
+        		save(m_CPU);
+        	}
             int oBase = registers[CPU.BASE];
             int oLim = registers[CPU.LIM];
-            int progSize = oLim - oBase+1;
+            int progSize = oLim - oBase;
         	if(newBase < 0 || newBase + progSize > m_RAM.getSize())
         	{
         		return false;
@@ -1552,14 +1556,11 @@ public class SOS implements CPU.TrapHandler
             registers[CPU.LIM] += newBase- oBase;
             registers[CPU.PC] += newBase - oBase;
             registers[CPU.SP] += newBase - oBase;	
-            if(equals(m_currProcess))
-            {
-            	int[] regs = m_CPU.getRegisters();
-                for(int i = 0; i < CPU.NUMREG; i++)
-                {
-                    regs[i] = registers[i];
-                }
-            }
+
+        	if(this == m_currProcess)
+        	{
+        		restore(m_CPU);
+        	} 
         	
         	debugPrintln("Process " + getProcessId() + " moved from " + oBase + " to " + newBase);
         	return true;
