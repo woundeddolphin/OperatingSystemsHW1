@@ -1555,7 +1555,7 @@ public class SOS implements CPU.TrapHandler
         	registers[CPU.BASE] += newBase - oBase;
             registers[CPU.LIM] += newBase- oBase;
             registers[CPU.PC] += newBase - oBase;
-            registers[CPU.SP] += newBase - oBase;	
+            //registers[CPU.SP] += newBase - oBase;	
 
         	if(this == m_currProcess)
         	{
