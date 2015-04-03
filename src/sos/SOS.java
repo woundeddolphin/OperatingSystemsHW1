@@ -389,7 +389,7 @@ public class SOS implements CPU.TrapHandler
         {
         	m_currProcess.save(m_CPU);
         }
-        //printMemAlloc();
+        printMemAlloc();
         
         m_currProcess = new ProcessControlBlock(m_nextProcessID);
         m_processes.add(m_currProcess);
@@ -1056,7 +1056,13 @@ public class SOS implements CPU.TrapHandler
      */
  
 
-    //<insert method header here>
+    /**
+     * allocBlock
+     * @param size
+     * takes a size and finds a place in ram to place something of that 
+     * size.
+     * @return the location of the available space or -1 if not such space exists
+     */
     private int allocBlock(int size)
     {    	
     	int totalSpace = 0;
@@ -1081,10 +1087,14 @@ public class SOS implements CPU.TrapHandler
     		defragment();
     		return(allocBlock(size));
     	}
-        System.out.println("Allocating space at " + finalLoc.m_addr + " of size " + size);
+        //System.out.println("Allocating space at " + finalLoc.m_addr + " of size " + size);
     	return finalLoc.m_addr;
     }//allocBlock
     
+    /**
+     * getFree
+     * updates the m_freeList to the current state of ram
+     */
     private void getFree()
     {
     	boolean[] used = new boolean[m_RAM.getSize()];
@@ -1122,7 +1132,11 @@ public class SOS implements CPU.TrapHandler
         	size = 0;
     	}
     }
-    
+   /**
+    * defragment
+    * 
+    *  removes fragmentation from ram by squashing all process together
+    */
     private void defragment()
     {
     	int nextLoc = 0;
@@ -1134,6 +1148,12 @@ public class SOS implements CPU.TrapHandler
     	}
     	getFree();
     }
+    
+    /**
+     * sorts the m_processes vector by the base value low to high
+     * 
+     * @returns the new vector
+     */
     private Vector<ProcessControlBlock> sort()
     {
     	Collections.sort(m_processes);
@@ -1161,7 +1181,11 @@ public class SOS implements CPU.TrapHandler
     }
     
 
-    //<insert method header here>
+    /**
+     * freeCurrProcessMemBlock
+     * 
+     * updates the m_freeList when a process is freed
+     */
     private void freeCurrProcessMemBlock()
     {
     	getFree();    	
@@ -1555,7 +1579,6 @@ public class SOS implements CPU.TrapHandler
         	registers[CPU.BASE] += newBase - oBase;
             registers[CPU.LIM] += newBase- oBase;
             registers[CPU.PC] += newBase - oBase;
-            //registers[CPU.SP] += newBase - oBase;	
 
         	if(this == m_currProcess)
         	{
