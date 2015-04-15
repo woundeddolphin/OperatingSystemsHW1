@@ -101,14 +101,15 @@ public class Sim
     public static void runAllocTest()
     {
         //Create the simulated hardware and OS
-        RAM ram = new RAM(3000, 0);
+        RAM ram = new RAM(4096, 0);
+        MMU mmu = new MMU(ram, 4096, 64);
         InterruptController ic = new InterruptController();
         KeyboardDevice kd = new KeyboardDevice(ic);
         kd.setId(0);
         ConsoleDevice cd = new ConsoleDevice(ic);
         cd.setId(1);
-        CPU cpu = new CPU(ram, ic);
-        SOS os  = new SOS(cpu, ram);
+        CPU cpu = new CPU(ram, ic, mmu);
+        SOS os  = new SOS(cpu, ram, mmu);
 
         //Register the device drivers with the OS
         os.registerDevice(kd, 0);

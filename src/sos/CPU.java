@@ -94,6 +94,10 @@ public class CPU implements Runnable {
 	 */
 	private InterruptController m_IC = null;
 
+	/**
+	 * a reference to the CPUs Memory Management Unit. 
+	 */
+	private MMU m_MMU = null;
 	
     /**
      * This variable will count how many
@@ -111,13 +115,14 @@ public class CPU implements Runnable {
 	 * 
 	 * Intializes all member variables.
 	 */
-	public CPU(RAM ram, InterruptController IC) {
+	public CPU(RAM ram, InterruptController IC, MMU m) {
 		m_registers = new int[NUMREG];
 		for (int i = 0; i < NUMREG; i++) {
 			m_registers[i] = 0;
 		}
 		m_RAM = ram;
 		m_IC = IC;
+		m_MMU = m;
 
 	}// CPU ctor
 
@@ -129,6 +134,7 @@ public class CPU implements Runnable {
 	public void registerTrapHandler(TrapHandler th)
 	{
 		m_TH = th;
+		m_MMU.registerTrapHandler(th);
 	}
 
 	/**
