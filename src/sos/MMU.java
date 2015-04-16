@@ -10,7 +10,7 @@ import java.util.*;
  * maintaining a page table for this MMU.  The MMU assumes that the
  * page table is stored in the bottom of RAM so that page numbers
  * correspond directly to the physical address of the page table entry
- * correponding to that page.  Each entry should contain a frame
+ * corresponding to that page.  Each entry should contain a frame
  * number (if valid) plus a state (see the constants defined below).
  *
  * @see CPU
@@ -295,12 +295,18 @@ public class MMU
         m_RAM.write(page, newEntry);
     }//setStatus
 
-
-    //<method header needed>
+    /**
+     * translate
+     * 
+     * This method takes a virtual address as input 
+     * and returns the corresponding physical address.
+     * @param virtAddr
+     * 
+     * @return physAddr
+     */
     private int translate(int virtAddr)
     {
-        //%%%You will implement this method
-        return -1;
+       return (m_RAM.read((virtAddr & m_pageMask)>>>m_offsetSize) << m_offsetSize)|(virtAddr&m_offsetMask);
     }//translate
 
     /**
@@ -355,9 +361,7 @@ public class MMU
         {
             instr[i] = m_RAM.read(physPC + i);
         }
-
         return instr;
-        
     }//fetch
 
      
